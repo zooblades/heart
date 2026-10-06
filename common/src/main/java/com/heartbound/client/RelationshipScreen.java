@@ -1,6 +1,7 @@
 package com.heartbound.client;
 
 import com.heartbound.menu.RelationshipMenu;
+import com.heartbound.relationship.Gender;
 import com.heartbound.relationship.RelationshipStage;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -15,7 +16,7 @@ import java.util.Locale;
 
 /**
  * The relationship window: portrait, name, gender, stage, affinity bar with stage markers and buttons.
- * Drawn with flat rectangles, so it needs no texture files.
+ * Drawn with flat rounded rectangles, so it needs no texture files.
  */
 public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu> {
 
@@ -27,7 +28,40 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
     private static final int BAR_W = 166;
     private static final int BAR_H = 8;
 
-    private Button followButton;
+    // palette
+    private static final int FRAME = 0xFF2E3440;
+    private static final int BODY = 0xFFE5E9F0;
+    private static final int PORTRAIT_BG = 0xFF1F2430;
+    private static final int BAR_TRACK = 0xFF4C566A;
+    private static final int BAR_FILL = 0xFFE0243A;
+    private static final int BAR_SHINE = 0xFFF2778A;
+    private static final int TEXT_MAIN = 0xFF2E3440;
+    private static final int TEXT_STAGE = 0xFF2E7D32;
+    private static final int MALE_COLOR = 0xFF2F6FDE;
+    private static final int FEMALE_COLOR = 0xFFE0559C;
+
+    private static final String[] MALE_ICON = {
+            ".....####",
+            ".......##",
+            "......#.#",
+            ".....#..#",
+            ".####....",
+            "#...#....",
+            "#...#....",
+            "#...#....",
+            ".###....."
+    };
+    private static final String[] FEMALE_ICON = {
+            "...###...",
+            "..#...#..",
+            "..#...#..",
+            "..#...#..",
+            "...###...",
+            "....#....",
+            "...###...",
+            "....#....",
+            "....#...."
+    };
 
     private static final int[] MARKERS = {
             RelationshipStage.ACQUAINTED.threshold(),
@@ -35,6 +69,8 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
             RelationshipStage.CLOSE.threshold(),
             RelationshipStage.PARTNERS.threshold()
     };
+
+    private Button followButton;
 
     public RelationshipScreen(RelationshipMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -47,12 +83,12 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         super.init();
         int x = leftPos;
         int y = topPos;
-        addRenderableWidget(Button.builder(Component.translatable("button.heartbound.gift"),
-                button -> press(RelationshipMenu.BUTTON_GIFT)).bounds(x + 10, y + 116, 76, 20).build());
-        addRenderableWidget(Button.builder(Component.translatable("button.heartbound.pet"),
-                button -> press(RelationshipMenu.BUTTON_PET)).bounds(x + 91, y + 116, 76, 20).build());
-        followButton = Button.builder(Component.translatable("button.heartbound.follow"),
-                button -> press(RelationshipMenu.BUTTON_FOLLOW)).bounds(x + 172, y + 116, 76, 20).build();
+        addRenderableWidget(new RoundedButton(x + 10, y + 116, 76, 20,
+                Component.translatable("button.heartbound.gift"), button -> press(RelationshipMenu.BUTTON_GIFT)));
+        addRenderableWidget(new RoundedButton(x + 91, y + 116, 76, 20,
+                Component.translatable("button.heartbound.pet"), button -> press(RelationshipMenu.BUTTON_PET)));
+        followButton = new RoundedButton(x + 172, y + 116, 76, 20,
+                Component.translatable("button.heartbound.follow"), button -> press(RelationshipMenu.BUTTON_FOLLOW));
         addRenderableWidget(followButton);
         addLocked(Component.translatable("button.heartbound.home"), x + 10, y + 140);
         addLocked(Component.translatable("button.heartbound.propose"), x + 91, y + 140);
@@ -70,7 +106,7 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
     }
 
     private void addLocked(Component label, int x, int y) {
-        Button button = Button.builder(label, b -> { }).bounds(x, y, 76, 20).build();
+        Button button = new RoundedButton(x, y, 76, 20, label, b -> { });
         button.active = false;
         addRenderableWidget(button);
     }
@@ -93,27 +129,36 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         int x = leftPos;
         int y = topPos;
 
-        g.fill(x, y, x + WIDTH, y + HEIGHT, 0xFF373737);
-        g.fill(x + 2, y + 2, x + WIDTH - 2, y + HEIGHT - 2, 0xFFC6C6C6);
+        // panel
+        UiDraw.roundedFill(g, x, y, x + WIDTH, y + HEIGHT, 7, FRAME);
+        UiDraw.roundedFill(g, x + 2, y + 2, x + WIDTH - 2, y + HEIGHT - 2, 5, BODY);
 
-        g.fill(x + 10, y + 12, x + 70, y + 104, 0xFF1E1E1E);
+        // portrait
+        UiDraw.roundedBox(g, x + 10, y + 12, x + 70, y + 104, 4, FRAME, PORTRAIT_BG);
         if (findTarget() instanceof LivingEntity living) {
             float size = Math.max(living.getBbHeight(), living.getBbWidth());
             int scale = (int) Math.max(12, Math.min(70, 56 / Math.max(0.3F, size)));
-            InventoryScreen.renderEntityInInventoryFollowsMouse(g, x + 10, y + 12, x + 70, y + 104,
+            InventoryScreen.renderEntityInInventoryFollowsMouse(g, x + 11, y + 13, x + 69, y + 103,
                     scale, 0.0625F, (float) mouseX, (float) mouseY, living);
         }
 
+        // affinity bar
         int affinity = Math.max(0, Math.min(RelationshipStage.MAX_AFFINITY, menu.getAffinity()));
         int bx = x + BAR_X;
         int by = y + BAR_Y;
-        g.fill(bx - 1, by - 1, bx + BAR_W + 1, by + BAR_H + 1, 0xFF373737);
-        g.fill(bx, by, bx + BAR_W, by + BAR_H, 0xFF555555);
+        UiDraw.roundedFill(g, bx - 1, by - 1, bx + BAR_W + 1, by + BAR_H + 1, 5, FRAME);
+        UiDraw.roundedFill(g, bx, by, bx + BAR_W, by + BAR_H, 4, BAR_TRACK);
         int filled = BAR_W * affinity / RelationshipStage.MAX_AFFINITY;
-        g.fill(bx, by, bx + filled, by + BAR_H, 0xFFE0243A);
+        if (filled > 0) {
+            int width = Math.max(filled, 4);
+            UiDraw.roundedFill(g, bx, by, bx + width, by + BAR_H, 4, BAR_FILL);
+            if (width > 8) {
+                g.fill(bx + 3, by + 1, bx + width - 3, by + 2, BAR_SHINE);
+            }
+        }
         for (int marker : MARKERS) {
             int mx = bx + BAR_W * marker / RelationshipStage.MAX_AFFINITY;
-            g.fill(mx, by - 2, mx + 1, by + BAR_H + 2, 0xFF000000);
+            g.fill(mx, by - 1, mx + 1, by + BAR_H + 1, FRAME);
         }
     }
 
@@ -124,9 +169,16 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         int affinity = Math.max(0, Math.min(RelationshipStage.MAX_AFFINITY, menu.getAffinity()));
         RelationshipStage stage = RelationshipStage.forAffinity(affinity);
 
-        g.drawString(font, name, 80, 14, 0x404040, false);
-        g.drawString(font, Component.translatable("gender.heartbound." + menu.getGender().key()), 80, 26, 0x606060, false);
-        g.drawString(font, Component.translatable("stage.heartbound." + stage.name().toLowerCase(Locale.ROOT)), 80, 38, 0x2E7D32, false);
-        g.drawString(font, Component.literal(affinity + " / " + RelationshipStage.MAX_AFFINITY), 80, 50, 0x404040, false);
+        g.drawString(font, name, 80, 14, TEXT_MAIN, false);
+
+        Gender gender = menu.getGender();
+        boolean male = gender == Gender.MALE;
+        int genderColor = male ? MALE_COLOR : FEMALE_COLOR;
+        UiDraw.pixels(g, 80, 25, male ? MALE_ICON : FEMALE_ICON, genderColor);
+        g.drawString(font, Component.translatable("gender.heartbound." + gender.key()), 93, 26, genderColor, false);
+
+        g.drawString(font, Component.translatable("stage.heartbound." + stage.name().toLowerCase(Locale.ROOT)),
+                80, 38, TEXT_STAGE, false);
+        g.drawString(font, Component.literal(affinity + " / " + RelationshipStage.MAX_AFFINITY), 80, 50, TEXT_MAIN, false);
     }
 }
