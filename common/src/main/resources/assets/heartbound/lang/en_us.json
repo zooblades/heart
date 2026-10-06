@@ -34,5 +34,8 @@
   "message.heartbound.partner_died": "Your partner %1$s is gone. The relationship has ended",
   "message.heartbound.home_set": "%1$s will wait for you here",
   "message.heartbound.home_need_partner": "Only a partner can have a home with you",
-  "message.heartbound.morning": "Good morning! %1$s smiles at you"
+  "message.heartbound.morning": "Good morning! %1$s smiles at you",
+  "key.heartbound.open": "Open relationship window",
+  "key.categories.heartbound": "Heartbound",
+  "hint.heartbound.pet": "Sneak + right-click with an empty hand: pet"
 }

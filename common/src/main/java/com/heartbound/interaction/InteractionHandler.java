@@ -30,8 +30,9 @@ import java.util.UUID;
 
 /**
  * Handles right-clicking a mob:
- * - sneaking: opens the relationship window;
- * - holding a gift: gives the gift directly.
+ * - sneaking with an empty hand: pets the mob;
+ * - holding a gift or a ring: gives the gift or proposes.
+ * The relationship window itself is opened with a key (see {@link #openFromKey}).
  * Each loader calls {@link #onUseEntity} from its own "player uses entity" event.
  * Returns PASS when the interaction is not ours, so vanilla behaviour is untouched.
  */
@@ -56,12 +57,6 @@ public final class InteractionHandler {
         if (!RomanceableMobs.isEligible(target)) {
             return InteractionResult.PASS;
         }
-        if (player.isShiftKeyDown()) {
-            if (player instanceof ServerPlayer serverPlayer) {
-                openWindow(serverPlayer, target);
-            }
-            return InteractionResult.SUCCESS;
-        }
         ItemStack stack = player.getItemInHand(hand);
         if (stack.getItem() instanceof RingItem) {
             if (player instanceof ServerPlayer serverPlayer) {
@@ -75,7 +70,23 @@ public final class InteractionHandler {
             }
             return InteractionResult.SUCCESS;
         }
+        if (player.isShiftKeyDown() && stack.isEmpty()) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                pet(serverPlayer, target);
+            }
+            return InteractionResult.SUCCESS;
+        }
         return InteractionResult.PASS;
+    }
+
+    /** Opens the window for the entity the player pressed the key at, after checking range and eligibility. */
+    public static void openFromKey(ServerPlayer player, int entityId) {
+        Entity entity = player.serverLevel().getEntity(entityId);
+        if (entity == null || player.isSpectator() || !RomanceableMobs.isEligible(entity)
+                || player.distanceToSqr(entity) > 64.0D) {
+            return;
+        }
+        openWindow(player, entity);
     }
 
     private static void openWindow(ServerPlayer player, Entity target) {

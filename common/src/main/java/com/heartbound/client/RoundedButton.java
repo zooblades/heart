@@ -5,7 +5,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
-/** A flat button with rounded corners. Inactive buttons are drawn greyed out. */
+/** A flat button with rounded corners, a soft gradient, a light edge and a drop shadow. */
 public class RoundedButton extends Button {
 
     public RoundedButton(int x, int y, int width, int height, Component message, Button.OnPress onPress) {
@@ -14,24 +14,26 @@ public class RoundedButton extends Button {
 
     @Override
     public void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        int background;
-        int border;
-        int text;
+        int x = getX();
+        int y = getY();
+        int w = getWidth();
+        int h = getHeight();
+        int textColor;
+
         if (!active) {
-            background = 0xFFB8C0CC;
-            border = 0xFF8F99A8;
-            text = 0xFF7B8594;
-        } else if (isHoveredOrFocused()) {
-            background = 0xFF81A1C1;
-            border = 0xFF2E3440;
-            text = 0xFFFFFFFF;
+            UiDraw.roundedBox(g, x, y, x + w, y + h, 3, 0xFF8F99A8, 0xFFB8C0CC);
+            textColor = 0xFF7B8594;
         } else {
-            background = 0xFF5E81AC;
-            border = 0xFF2E3440;
-            text = 0xFFFFFFFF;
+            boolean hover = isHoveredOrFocused();
+            int top = hover ? 0xFF93B3D6 : 0xFF6F93BF;
+            int bottom = hover ? 0xFF6189B6 : 0xFF4B6D99;
+            UiDraw.roundedFill(g, x, y + 1, x + w, y + h + 1, 3, 0x55000000);
+            UiDraw.roundedFill(g, x, y, x + w, y + h, 3, 0xFF2E3440);
+            UiDraw.roundedGradient(g, x + 1, y + 1, x + w - 1, y + h - 1, 2, top, bottom);
+            g.fill(x + 3, y + 1, x + w - 3, y + 2, 0x66FFFFFF);
+            textColor = 0xFFFFFFFF;
         }
-        UiDraw.roundedBox(g, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 3, border, background);
         g.drawCenteredString(Minecraft.getInstance().font, getMessage(),
-                getX() + getWidth() / 2, getY() + (getHeight() - 8) / 2, text);
+                x + w / 2, y + (h - 8) / 2, textColor);
     }
 }

@@ -6,7 +6,9 @@ import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.item.ModItems;
 import com.heartbound.menu.ModMenus;
 import com.heartbound.menu.RelationshipMenu;
+import com.heartbound.network.OpenRelationshipPayload;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
@@ -17,6 +19,8 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
 @Mod(Constants.MOD_ID)
@@ -30,6 +34,7 @@ public class HeartboundNeoForge {
 
         modEventBus.addListener(HeartboundNeoForge::onRegister);
         modEventBus.addListener(HeartboundNeoForge::onCreativeTab);
+        modEventBus.addListener(HeartboundNeoForge::onRegisterPayloads);
 
         NeoForge.EVENT_BUS.addListener(HeartboundNeoForge::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener(HeartboundNeoForge::onEntityInteract);
@@ -41,6 +46,16 @@ public class HeartboundNeoForge {
                 ModItems.all().forEach((name, item) -> helper.register(ModItems.id(name), item)));
         event.register(Registries.MENU, helper ->
                 helper.register(ModMenus.id(ModMenus.RELATIONSHIP_NAME), ModMenus.RELATIONSHIP));
+    }
+
+    private static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar("1");
+        registrar.playToServer(OpenRelationshipPayload.TYPE, OpenRelationshipPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        InteractionHandler.openFromKey(serverPlayer, payload.entityId());
+                    }
+                }));
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {

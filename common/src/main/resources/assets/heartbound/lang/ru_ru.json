@@ -34,5 +34,8 @@
   "message.heartbound.partner_died": "Ваш партнёр %1$s погиб. Отношения закончены",
   "message.heartbound.home_set": "%1$s будет ждать вас здесь",
   "message.heartbound.home_need_partner": "Дом можно завести только с партнёром",
-  "message.heartbound.morning": "Доброе утро! %1$s улыбается вам"
+  "message.heartbound.morning": "Доброе утро! %1$s улыбается вам",
+  "key.heartbound.open": "Открыть окно отношений",
+  "key.categories.heartbound": "Heartbound",
+  "hint.heartbound.pet": "Shift + ПКМ пустой рукой: погладить"
 }

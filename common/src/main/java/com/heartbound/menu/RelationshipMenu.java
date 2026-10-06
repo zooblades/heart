@@ -23,7 +23,6 @@ import java.util.UUID;
 public class RelationshipMenu extends AbstractContainerMenu {
 
     public static final int BUTTON_GIFT = 0;
-    public static final int BUTTON_PET = 1;
     public static final int BUTTON_FOLLOW = 2;
     public static final int BUTTON_PROPOSE = 3;
     public static final int BUTTON_HOME = 4;
@@ -119,9 +118,6 @@ public class RelationshipMenu extends AbstractContainerMenu {
         switch (id) {
             case BUTTON_GIFT:
                 InteractionHandler.giveHeldGift(serverPlayer, target);
-                return true;
-            case BUTTON_PET:
-                InteractionHandler.pet(serverPlayer, target);
                 return true;
             case BUTTON_FOLLOW:
                 InteractionHandler.toggleFollow(serverPlayer, target);
