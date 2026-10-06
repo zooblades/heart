@@ -9,6 +9,7 @@
     ],
     "license": "${license}",
     "environment": "*",
+    "accessWidener": "heartbound.accesswidener",
     "entrypoints": {
         "main": [
             "com.heartbound.HeartboundFabric"

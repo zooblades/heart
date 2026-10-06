@@ -4,12 +4,15 @@ import com.heartbound.command.HeartboundCommands;
 import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.item.ModItems;
 import com.heartbound.menu.ModMenus;
+import com.heartbound.menu.RelationshipMenu;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTabs;
 
 public class HeartboundFabric implements ModInitializer {
@@ -21,6 +24,7 @@ public class HeartboundFabric implements ModInitializer {
 
         ModItems.all().forEach((name, item) -> Registry.register(BuiltInRegistries.ITEM, ModItems.id(name), item));
 
+        ModMenus.init(new MenuType<>(RelationshipMenu::new, FeatureFlags.DEFAULT_FLAGS));
         Registry.register(BuiltInRegistries.MENU, ModMenus.id(ModMenus.RELATIONSHIP_NAME), ModMenus.RELATIONSHIP);
 
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries ->

@@ -4,12 +4,14 @@ import com.heartbound.command.HeartboundCommands;
 import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.item.ModItems;
 import com.heartbound.menu.ModMenus;
+import com.heartbound.menu.RelationshipMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -21,6 +23,8 @@ public class HeartboundNeoForge {
     public HeartboundNeoForge(IEventBus modEventBus) {
         Constants.LOG.info("Hello NeoForge world!");
         HeartboundCommon.init();
+
+        ModMenus.init(IMenuTypeExtension.create((containerId, inventory, buffer) -> new RelationshipMenu(containerId, inventory)));
 
         modEventBus.addListener(HeartboundNeoForge::onRegister);
         modEventBus.addListener(HeartboundNeoForge::onCreativeTab);
