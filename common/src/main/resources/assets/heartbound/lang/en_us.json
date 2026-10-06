@@ -1,0 +1,10 @@
+{
+  "item.heartbound.bouquet": "Bouquet",
+  "item.heartbound.heart_charm": "Heart Charm",
+  "stage.heartbound.strangers": "Strangers",
+  "stage.heartbound.acquainted": "Acquaintances",
+  "stage.heartbound.friends": "Friends",
+  "stage.heartbound.close": "Close",
+  "stage.heartbound.partners": "Partners",
+  "message.heartbound.affinity": "%1$s: %2$s affinity (%3$s/%4$s, %5$s)"
+}

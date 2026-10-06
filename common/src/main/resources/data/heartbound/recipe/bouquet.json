@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "tag": "minecraft:small_flowers" },
+    { "tag": "minecraft:small_flowers" },
+    { "tag": "minecraft:small_flowers" },
+    { "item": "minecraft:string" }
+  ],
+  "result": { "id": "heartbound:bouquet", "count": 1 }
+}

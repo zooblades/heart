@@ -1,0 +1,10 @@
+{
+  "item.heartbound.bouquet": "Букет",
+  "item.heartbound.heart_charm": "Сердечный амулет",
+  "stage.heartbound.strangers": "Незнакомцы",
+  "stage.heartbound.acquainted": "Знакомые",
+  "stage.heartbound.friends": "Друзья",
+  "stage.heartbound.close": "Близкие",
+  "stage.heartbound.partners": "Пара",
+  "message.heartbound.affinity": "%1$s: симпатия %2$s (%3$s/%4$s, %5$s)"
+}
