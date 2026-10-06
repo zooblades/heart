@@ -37,7 +37,7 @@ public final class KeyHandler {
         while (OPEN_KEY.consumeClick()) {
             pressed = true;
         }
-        InputConstants.Key key = OPEN_KEY.getKey();
+        InputConstants.Key key = InputConstants.getKey(OPEN_KEY.saveString());
         if (key.getType() == InputConstants.Type.KEYSYM) {
             boolean down = InputConstants.isKeyDown(mc.getWindow().getWindow(), key.getValue());
             if (down && !wasDown) {
