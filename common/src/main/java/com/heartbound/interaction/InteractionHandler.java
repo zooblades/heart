@@ -24,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * Handles right-clicking a mob:
@@ -37,6 +38,7 @@ public final class InteractionHandler {
     public static final int GIFT_COOLDOWN_TICKS = 20;
     public static final int PET_COOLDOWN_TICKS = 100;
     public static final int PET_GAIN = 3;
+    public static final int MAX_FOLLOWERS = 3;
 
     private static final CooldownTracker GIFT_COOLDOWNS = new CooldownTracker();
     private static final CooldownTracker PET_COOLDOWNS = new CooldownTracker();
@@ -109,6 +111,33 @@ public final class InteractionHandler {
             return false;
         }
         applyGain(level, player, target, PET_GAIN, 3);
+        return true;
+    }
+
+    /** Starts or stops the mob following the player. Needs the Friends stage. */
+    public static boolean toggleFollow(ServerPlayer player, Entity target) {
+        if (!RomanceableMobs.isEligible(target) || player.getServer() == null) {
+            return false;
+        }
+        RelationshipData data = RelationshipData.get(player.getServer());
+        UUID mobId = target.getUUID();
+        UUID playerId = player.getUUID();
+
+        if (playerId.equals(data.getFollowTarget(mobId))) {
+            data.stopFollowing(mobId);
+            player.displayClientMessage(Component.translatable("message.heartbound.follow_off", target.getName()), true);
+            return true;
+        }
+        if (data.get(mobId, playerId) < RelationshipStage.FRIENDS.threshold()) {
+            player.displayClientMessage(Component.translatable("message.heartbound.follow_need_friends", target.getName()), true);
+            return false;
+        }
+        if (data.countFollowing(playerId) >= MAX_FOLLOWERS) {
+            player.displayClientMessage(Component.translatable("message.heartbound.follow_too_many", MAX_FOLLOWERS), true);
+            return false;
+        }
+        data.setFollowing(mobId, playerId);
+        player.displayClientMessage(Component.translatable("message.heartbound.follow_on", target.getName()), true);
         return true;
     }
 

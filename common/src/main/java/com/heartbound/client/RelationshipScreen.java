@@ -27,6 +27,8 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
     private static final int BAR_W = 166;
     private static final int BAR_H = 8;
 
+    private Button followButton;
+
     private static final int[] MARKERS = {
             RelationshipStage.ACQUAINTED.threshold(),
             RelationshipStage.FRIENDS.threshold(),
@@ -49,9 +51,22 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
                 button -> press(RelationshipMenu.BUTTON_GIFT)).bounds(x + 10, y + 116, 76, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("button.heartbound.pet"),
                 button -> press(RelationshipMenu.BUTTON_PET)).bounds(x + 91, y + 116, 76, 20).build());
-        addLocked(Component.translatable("button.heartbound.follow"), x + 172, y + 116);
+        followButton = Button.builder(Component.translatable("button.heartbound.follow"),
+                button -> press(RelationshipMenu.BUTTON_FOLLOW)).bounds(x + 172, y + 116, 76, 20).build();
+        addRenderableWidget(followButton);
         addLocked(Component.translatable("button.heartbound.home"), x + 10, y + 140);
         addLocked(Component.translatable("button.heartbound.propose"), x + 91, y + 140);
+    }
+
+    @Override
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        if (followButton != null) {
+            followButton.setMessage(Component.translatable(
+                    menu.isFollowing() ? "button.heartbound.follow_stop" : "button.heartbound.follow"));
+            followButton.active = menu.isFollowing()
+                    || menu.getAffinity() >= RelationshipStage.FRIENDS.threshold();
+        }
+        super.render(g, mouseX, mouseY, partialTick);
     }
 
     private void addLocked(Component label, int x, int y) {

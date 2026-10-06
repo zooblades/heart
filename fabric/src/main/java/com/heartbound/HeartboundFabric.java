@@ -1,5 +1,6 @@
 package com.heartbound;
 
+import com.heartbound.behavior.StageBehaviors;
 import com.heartbound.command.HeartboundCommands;
 import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.item.ModItems;
@@ -7,6 +8,7 @@ import com.heartbound.menu.ModMenus;
 import com.heartbound.menu.RelationshipMenu;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
@@ -32,6 +34,8 @@ public class HeartboundFabric implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, registryAccess, environment) -> HeartboundCommands.register(dispatcher));
+
+        ServerTickEvents.END_SERVER_TICK.register(StageBehaviors::tick);
 
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) ->
                 InteractionHandler.onUseEntity(player, world, hand, entity));

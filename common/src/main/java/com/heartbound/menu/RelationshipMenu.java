@@ -24,12 +24,14 @@ public class RelationshipMenu extends AbstractContainerMenu {
 
     public static final int BUTTON_GIFT = 0;
     public static final int BUTTON_PET = 1;
+    public static final int BUTTON_FOLLOW = 2;
 
     private static final int DATA_AFFINITY = 0;
     private static final int DATA_GENDER = 1;
     private static final int DATA_ENTITY_LOW = 2;
     private static final int DATA_ENTITY_HIGH = 3;
-    private static final int DATA_COUNT = 4;
+    private static final int DATA_FOLLOWING = 4;
+    private static final int DATA_COUNT = 5;
 
     private final ContainerData data;
     /** Only set on the server. */
@@ -67,6 +69,7 @@ public class RelationshipMenu extends AbstractContainerMenu {
                     case DATA_GENDER -> gender;
                     case DATA_ENTITY_LOW -> entityId & 0xFFFF;
                     case DATA_ENTITY_HIGH -> entityId >>> 16;
+                    case DATA_FOLLOWING -> server != null && playerId.equals(RelationshipData.get(server).getFollowTarget(mobId)) ? 1 : 0;
                     default -> 0;
                 };
             }
@@ -92,6 +95,10 @@ public class RelationshipMenu extends AbstractContainerMenu {
         return values[Math.max(0, Math.min(values.length - 1, index))];
     }
 
+    public boolean isFollowing() {
+        return data.get(DATA_FOLLOWING) == 1;
+    }
+
     public int getTargetId() {
         return ((data.get(DATA_ENTITY_HIGH) & 0xFFFF) << 16) | (data.get(DATA_ENTITY_LOW) & 0xFFFF);
     }
@@ -107,6 +114,9 @@ public class RelationshipMenu extends AbstractContainerMenu {
                 return true;
             case BUTTON_PET:
                 InteractionHandler.pet(serverPlayer, target);
+                return true;
+            case BUTTON_FOLLOW:
+                InteractionHandler.toggleFollow(serverPlayer, target);
                 return true;
             default:
                 return false;

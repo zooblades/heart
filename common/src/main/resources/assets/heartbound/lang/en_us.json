@@ -15,5 +15,10 @@
   "button.heartbound.home": "Home",
   "button.heartbound.propose": "Propose",
   "message.heartbound.need_gift": "Hold a gift in your hand",
-  "message.heartbound.affinity": "%1$s: %2$s affinity (%3$s/%4$s, %5$s)"
+  "message.heartbound.affinity": "%1$s: %2$s affinity (%3$s/%4$s, %5$s)",
+  "button.heartbound.follow_stop": "Stop following",
+  "message.heartbound.follow_on": "%1$s now follows you",
+  "message.heartbound.follow_off": "%1$s stopped following you",
+  "message.heartbound.follow_need_friends": "%1$s must be at least a friend to follow you",
+  "message.heartbound.follow_too_many": "You can have at most %1$s followers"
 }

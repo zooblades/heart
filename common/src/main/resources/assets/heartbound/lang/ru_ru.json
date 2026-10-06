@@ -15,5 +15,10 @@
   "button.heartbound.home": "Домой",
   "button.heartbound.propose": "Предложение",
   "message.heartbound.need_gift": "Возьмите подарок в руку",
-  "message.heartbound.affinity": "%1$s: симпатия %2$s (%3$s/%4$s, %5$s)"
+  "message.heartbound.affinity": "%1$s: симпатия %2$s (%3$s/%4$s, %5$s)",
+  "button.heartbound.follow_stop": "Остановиться",
+  "message.heartbound.follow_on": "%1$s теперь следует за вами",
+  "message.heartbound.follow_off": "%1$s больше не следует за вами",
+  "message.heartbound.follow_need_friends": "%1$s должен быть хотя бы другом, чтобы следовать за вами",
+  "message.heartbound.follow_too_many": "За вами может следовать не больше %1$s"
 }

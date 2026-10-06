@@ -1,5 +1,6 @@
 package com.heartbound;
 
+import com.heartbound.behavior.StageBehaviors;
 import com.heartbound.command.HeartboundCommands;
 import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.item.ModItems;
@@ -15,6 +16,7 @@ import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
 @Mod(Constants.MOD_ID)
@@ -31,6 +33,7 @@ public class HeartboundNeoForge {
 
         NeoForge.EVENT_BUS.addListener(HeartboundNeoForge::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener(HeartboundNeoForge::onEntityInteract);
+        NeoForge.EVENT_BUS.addListener(HeartboundNeoForge::onServerTick);
     }
 
     private static void onRegister(RegisterEvent event) {
@@ -48,6 +51,10 @@ public class HeartboundNeoForge {
 
     private static void onRegisterCommands(RegisterCommandsEvent event) {
         HeartboundCommands.register(event.getDispatcher());
+    }
+
+    private static void onServerTick(ServerTickEvent.Post event) {
+        StageBehaviors.tick(event.getServer());
     }
 
     private static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
