@@ -1,10 +1,12 @@
 package com.heartbound.interaction;
 
 import com.heartbound.item.GiftItem;
+import com.heartbound.item.RingItem;
 import com.heartbound.menu.RelationshipMenu;
 import com.heartbound.relationship.CooldownTracker;
 import com.heartbound.relationship.Gender;
 import com.heartbound.relationship.GiftPreferences;
+import com.heartbound.relationship.Home;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RelationshipStage;
 import com.heartbound.relationship.RomanceableMobs;
@@ -39,6 +41,7 @@ public final class InteractionHandler {
     public static final int PET_COOLDOWN_TICKS = 100;
     public static final int PET_GAIN = 3;
     public static final int MAX_FOLLOWERS = 3;
+    public static final int BREAKUP_AFFINITY = 300;
 
     private static final CooldownTracker GIFT_COOLDOWNS = new CooldownTracker();
     private static final CooldownTracker PET_COOLDOWNS = new CooldownTracker();
@@ -60,6 +63,12 @@ public final class InteractionHandler {
             return InteractionResult.SUCCESS;
         }
         ItemStack stack = player.getItemInHand(hand);
+        if (stack.getItem() instanceof RingItem) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                propose(serverPlayer, target, stack);
+            }
+            return InteractionResult.SUCCESS;
+        }
         if (stack.getItem() instanceof GiftItem gift) {
             if (player instanceof ServerPlayer serverPlayer) {
                 giveGift(serverPlayer, target, stack, gift);
@@ -111,6 +120,96 @@ public final class InteractionHandler {
             return false;
         }
         applyGain(level, player, target, PET_GAIN, 3);
+        return true;
+    }
+
+    /** Proposes with the ring in the player's main hand (used by the window button). */
+    public static boolean proposeWithHeldRing(ServerPlayer player, Entity target) {
+        ItemStack stack = player.getMainHandItem();
+        if (stack.getItem() instanceof RingItem) {
+            return propose(player, target, stack);
+        }
+        player.displayClientMessage(Component.translatable("message.heartbound.need_ring"), true);
+        return false;
+    }
+
+    /** Proposal: needs enough affinity, a free mob and a free player. Consumes the ring on success. */
+    public static boolean propose(ServerPlayer player, Entity target, ItemStack ring) {
+        ServerLevel level = player.serverLevel();
+        if (!RomanceableMobs.isEligible(target) || player.getServer() == null) {
+            return false;
+        }
+        RelationshipData data = RelationshipData.get(player.getServer());
+        UUID mobId = target.getUUID();
+        UUID playerId = player.getUUID();
+
+        if (data.isPartner(mobId, playerId)) {
+            player.displayClientMessage(Component.translatable("message.heartbound.already_together", target.getName()), true);
+            return false;
+        }
+        if (data.getPartnerOfPlayer(playerId) != null) {
+            player.displayClientMessage(Component.translatable("message.heartbound.you_have_partner"), true);
+            return false;
+        }
+        if (data.getPartnerOfMob(mobId) != null) {
+            player.displayClientMessage(Component.translatable("message.heartbound.mob_taken", target.getName()), true);
+            return false;
+        }
+        if (!RelationshipStage.canPropose(data.get(mobId, playerId))) {
+            level.sendParticles(ParticleTypes.SMOKE,
+                    target.getX(), target.getY() + target.getBbHeight() + 0.2, target.getZ(), 6, 0.2, 0.1, 0.2, 0.01);
+            player.displayClientMessage(Component.translatable("message.heartbound.propose_not_ready",
+                    target.getName(), RelationshipStage.PROPOSAL_MIN_AFFINITY), true);
+            return false;
+        }
+        if (!data.pair(mobId, playerId)) {
+            return false;
+        }
+        if (!player.getAbilities().instabuild) {
+            ring.shrink(1);
+        }
+        level.sendParticles(ParticleTypes.HEART,
+                target.getX(), target.getY() + target.getBbHeight() + 0.2, target.getZ(), 25, 0.5, 0.4, 0.5, 0.05);
+        level.playSound(null, target.getX(), target.getY(), target.getZ(),
+                SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 1.0F, 1.2F);
+        player.displayClientMessage(Component.translatable("message.heartbound.propose_accepted", target.getName()), false);
+        return true;
+    }
+
+    /** Ends the player's relationship with their partner (works even if the partner is gone). */
+    public static boolean breakUp(ServerPlayer player) {
+        if (player.getServer() == null) {
+            return false;
+        }
+        RelationshipData data = RelationshipData.get(player.getServer());
+        UUID mobId = data.unpairPlayer(player.getUUID());
+        if (mobId == null) {
+            player.displayClientMessage(Component.translatable("message.heartbound.no_partner"), false);
+            return false;
+        }
+        data.clearHome(mobId);
+        data.stopFollowing(mobId);
+        int current = data.get(mobId, player.getUUID());
+        data.set(mobId, player.getUUID(), Math.min(current, BREAKUP_AFFINITY));
+        player.displayClientMessage(Component.translatable("message.heartbound.breakup"), false);
+        return true;
+    }
+
+    /** Makes the partner wait at the player's current position. */
+    public static boolean setHome(ServerPlayer player, Entity target) {
+        if (!RomanceableMobs.isEligible(target) || player.getServer() == null) {
+            return false;
+        }
+        RelationshipData data = RelationshipData.get(player.getServer());
+        if (!data.isPartner(target.getUUID(), player.getUUID())) {
+            player.displayClientMessage(Component.translatable("message.heartbound.home_need_partner"), true);
+            return false;
+        }
+        data.setHome(target.getUUID(), new Home(
+                player.level().dimension().location().toString(), player.blockPosition().asLong()));
+        player.serverLevel().sendParticles(ParticleTypes.HEART,
+                target.getX(), target.getY() + target.getBbHeight() + 0.2, target.getZ(), 5, 0.3, 0.2, 0.3, 0.02);
+        player.displayClientMessage(Component.translatable("message.heartbound.home_set", target.getName()), true);
         return true;
     }
 

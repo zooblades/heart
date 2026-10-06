@@ -20,5 +20,19 @@
   "message.heartbound.follow_on": "%1$s now follows you",
   "message.heartbound.follow_off": "%1$s stopped following you",
   "message.heartbound.follow_need_friends": "%1$s must be at least a friend to follow you",
-  "message.heartbound.follow_too_many": "You can have at most %1$s followers"
+  "message.heartbound.follow_too_many": "You can have at most %1$s followers",
+  "item.heartbound.promise_ring": "Promise Ring",
+  "button.heartbound.partner": "Partner",
+  "message.heartbound.need_ring": "Hold a Promise Ring in your hand",
+  "message.heartbound.propose_not_ready": "%1$s is not ready yet (needs %2$s affinity)",
+  "message.heartbound.propose_accepted": "%1$s said yes! You are now partners",
+  "message.heartbound.you_have_partner": "You already have a partner",
+  "message.heartbound.mob_taken": "%1$s already has a partner",
+  "message.heartbound.already_together": "You and %1$s are already partners",
+  "message.heartbound.breakup": "You broke up with your partner",
+  "message.heartbound.no_partner": "You have no partner",
+  "message.heartbound.partner_died": "Your partner %1$s is gone. The relationship has ended",
+  "message.heartbound.home_set": "%1$s will wait for you here",
+  "message.heartbound.home_need_partner": "Only a partner can have a home with you",
+  "message.heartbound.morning": "Good morning! %1$s smiles at you"
 }

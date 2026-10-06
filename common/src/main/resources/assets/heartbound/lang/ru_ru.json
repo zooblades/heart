@@ -20,5 +20,19 @@
   "message.heartbound.follow_on": "%1$s теперь следует за вами",
   "message.heartbound.follow_off": "%1$s больше не следует за вами",
   "message.heartbound.follow_need_friends": "%1$s должен быть хотя бы другом, чтобы следовать за вами",
-  "message.heartbound.follow_too_many": "За вами может следовать не больше %1$s"
+  "message.heartbound.follow_too_many": "За вами может следовать не больше %1$s",
+  "item.heartbound.promise_ring": "Кольцо обещания",
+  "button.heartbound.partner": "Партнёр",
+  "message.heartbound.need_ring": "Возьмите кольцо обещания в руку",
+  "message.heartbound.propose_not_ready": "%1$s пока не готов(а) (нужна симпатия %2$s)",
+  "message.heartbound.propose_accepted": "%1$s говорит «да»! Теперь вы пара",
+  "message.heartbound.you_have_partner": "У вас уже есть партнёр",
+  "message.heartbound.mob_taken": "У %1$s уже есть партнёр",
+  "message.heartbound.already_together": "Вы с %1$s уже пара",
+  "message.heartbound.breakup": "Вы расстались с партнёром",
+  "message.heartbound.no_partner": "У вас нет партнёра",
+  "message.heartbound.partner_died": "Ваш партнёр %1$s погиб. Отношения закончены",
+  "message.heartbound.home_set": "%1$s будет ждать вас здесь",
+  "message.heartbound.home_need_partner": "Дом можно завести только с партнёром",
+  "message.heartbound.morning": "Доброе утро! %1$s улыбается вам"
 }

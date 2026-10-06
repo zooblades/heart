@@ -37,6 +37,7 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
     private static final int BAR_SHINE = 0xFFF2778A;
     private static final int TEXT_MAIN = 0xFF2E3440;
     private static final int TEXT_STAGE = 0xFF2E7D32;
+    private static final int TEXT_PARTNER = 0xFFC2185B;
     private static final int MALE_COLOR = 0xFF2F6FDE;
     private static final int FEMALE_COLOR = 0xFFE0559C;
 
@@ -71,6 +72,8 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
     };
 
     private Button followButton;
+    private Button proposeButton;
+    private Button homeButton;
 
     public RelationshipScreen(RelationshipMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -90,8 +93,12 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         followButton = new RoundedButton(x + 172, y + 116, 76, 20,
                 Component.translatable("button.heartbound.follow"), button -> press(RelationshipMenu.BUTTON_FOLLOW));
         addRenderableWidget(followButton);
-        addLocked(Component.translatable("button.heartbound.home"), x + 10, y + 140);
-        addLocked(Component.translatable("button.heartbound.propose"), x + 91, y + 140);
+        homeButton = new RoundedButton(x + 10, y + 140, 76, 20,
+                Component.translatable("button.heartbound.home"), button -> press(RelationshipMenu.BUTTON_HOME));
+        addRenderableWidget(homeButton);
+        proposeButton = new RoundedButton(x + 91, y + 140, 76, 20,
+                Component.translatable("button.heartbound.propose"), button -> press(RelationshipMenu.BUTTON_PROPOSE));
+        addRenderableWidget(proposeButton);
     }
 
     @Override
@@ -102,13 +109,16 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
             followButton.active = menu.isFollowing()
                     || menu.getAffinity() >= RelationshipStage.FRIENDS.threshold();
         }
+        if (proposeButton != null) {
+            proposeButton.setMessage(Component.translatable(
+                    menu.isPartner() ? "button.heartbound.partner" : "button.heartbound.propose"));
+            proposeButton.active = !menu.isPartner()
+                    && RelationshipStage.canPropose(menu.getAffinity());
+        }
+        if (homeButton != null) {
+            homeButton.active = menu.isPartner();
+        }
         super.render(g, mouseX, mouseY, partialTick);
-    }
-
-    private void addLocked(Component label, int x, int y) {
-        Button button = new RoundedButton(x, y, 76, 20, label, b -> { });
-        button.active = false;
-        addRenderableWidget(button);
     }
 
     private void press(int buttonId) {
@@ -167,7 +177,7 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         Entity target = findTarget();
         Component name = target != null ? target.getName() : title;
         int affinity = Math.max(0, Math.min(RelationshipStage.MAX_AFFINITY, menu.getAffinity()));
-        RelationshipStage stage = RelationshipStage.forAffinity(affinity);
+        RelationshipStage stage = menu.isPartner() ? RelationshipStage.PARTNERS : RelationshipStage.forAffinity(affinity);
 
         g.drawString(font, name, 80, 14, TEXT_MAIN, false);
 
@@ -178,7 +188,7 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         g.drawString(font, Component.translatable("gender.heartbound." + gender.key()), 93, 26, genderColor, false);
 
         g.drawString(font, Component.translatable("stage.heartbound." + stage.name().toLowerCase(Locale.ROOT)),
-                80, 38, TEXT_STAGE, false);
+                80, 38, menu.isPartner() ? TEXT_PARTNER : TEXT_STAGE, false);
         g.drawString(font, Component.literal(affinity + " / " + RelationshipStage.MAX_AFFINITY), 80, 50, TEXT_MAIN, false);
     }
 }

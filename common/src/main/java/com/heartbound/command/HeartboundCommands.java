@@ -1,5 +1,6 @@
 package com.heartbound.command;
 
+import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RelationshipStage;
 import com.heartbound.relationship.RomanceableMobs;
@@ -33,8 +34,8 @@ public final class HeartboundCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         int max = RelationshipStage.MAX_AFFINITY;
         dispatcher.register(Commands.literal("heartbound")
-                .requires(source -> source.hasPermission(2))
-                .then(Commands.literal("affinity")
+                .then(Commands.literal("breakup").executes(HeartboundCommands::breakUp))
+                .then(Commands.literal("affinity").requires(source -> source.hasPermission(2))
                         .then(Commands.literal("get")
                                 .then(Commands.argument("mob", EntityArgument.entity())
                                         .executes(HeartboundCommands::get)))
@@ -46,6 +47,11 @@ public final class HeartboundCommands {
                                 .then(Commands.argument("mob", EntityArgument.entity())
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(-max, max))
                                                 .executes(HeartboundCommands::add))))));
+    }
+
+    private static int breakUp(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        return InteractionHandler.breakUp(player) ? 1 : 0;
     }
 
     private static Entity resolveMob(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

@@ -17,11 +17,14 @@ public final class ModItems {
     public static final GiftItem BOUQUET = new GiftItem(new Item.Properties().stacksTo(16), GiftKind.BOUQUET);
     public static final GiftItem HEART_CHARM = new GiftItem(new Item.Properties().stacksTo(16), GiftKind.HEART_CHARM);
 
+    public static final RingItem PROMISE_RING = new RingItem(new Item.Properties().stacksTo(1));
+
     private static final Map<String, Item> ALL = new LinkedHashMap<>();
 
     static {
         ALL.put("bouquet", BOUQUET);
         ALL.put("heart_charm", HEART_CHARM);
+        ALL.put("promise_ring", PROMISE_RING);
     }
 
     private ModItems() {
