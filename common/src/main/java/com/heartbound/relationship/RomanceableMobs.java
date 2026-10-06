@@ -7,7 +7,7 @@ import net.minecraft.world.entity.LivingEntity;
 import java.util.Set;
 
 /**
- * Which mobs can take part in relationships. First version: adult villagers, wolves, cats and foxes.
+ * Which mobs can take part in relationships. First version: adult villagers, wolves, cats, foxes and piglins.
  * Babies are never eligible. This will become data driven later.
  */
 public final class RomanceableMobs {
@@ -16,7 +16,8 @@ public final class RomanceableMobs {
             EntityType.VILLAGER,
             EntityType.WOLF,
             EntityType.CAT,
-            EntityType.FOX
+            EntityType.FOX,
+            EntityType.PIGLIN
     );
 
     private RomanceableMobs() {

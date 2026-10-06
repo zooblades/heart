@@ -3,6 +3,7 @@ package com.heartbound;
 import com.heartbound.command.HeartboundCommands;
 import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.item.ModItems;
+import com.heartbound.menu.ModMenus;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -31,6 +32,8 @@ public class HeartboundNeoForge {
     private static void onRegister(RegisterEvent event) {
         event.register(Registries.ITEM, helper ->
                 ModItems.all().forEach((name, item) -> helper.register(ModItems.id(name), item)));
+        event.register(Registries.MENU, helper ->
+                helper.register(ModMenus.id(ModMenus.RELATIONSHIP_NAME), ModMenus.RELATIONSHIP));
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {

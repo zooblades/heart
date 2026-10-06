@@ -6,5 +6,14 @@
   "stage.heartbound.friends": "Друзья",
   "stage.heartbound.close": "Близкие",
   "stage.heartbound.partners": "Пара",
+  "gender.heartbound.male": "Мужской",
+  "gender.heartbound.female": "Женский",
+  "screen.heartbound.relationship": "Отношения",
+  "button.heartbound.gift": "Подарить",
+  "button.heartbound.pet": "Погладить",
+  "button.heartbound.follow": "Следовать",
+  "button.heartbound.home": "Домой",
+  "button.heartbound.propose": "Предложение",
+  "message.heartbound.need_gift": "Возьмите подарок в руку",
   "message.heartbound.affinity": "%1$s: симпатия %2$s (%3$s/%4$s, %5$s)"
 }

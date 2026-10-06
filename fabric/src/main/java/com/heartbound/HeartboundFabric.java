@@ -3,6 +3,7 @@ package com.heartbound;
 import com.heartbound.command.HeartboundCommands;
 import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.item.ModItems;
+import com.heartbound.menu.ModMenus;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -19,6 +20,8 @@ public class HeartboundFabric implements ModInitializer {
         HeartboundCommon.init();
 
         ModItems.all().forEach((name, item) -> Registry.register(BuiltInRegistries.ITEM, ModItems.id(name), item));
+
+        Registry.register(BuiltInRegistries.MENU, ModMenus.id(ModMenus.RELATIONSHIP_NAME), ModMenus.RELATIONSHIP);
 
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries ->
                 ModItems.all().values().forEach(item -> entries.accept(item)));

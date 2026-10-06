@@ -1,7 +1,9 @@
 package com.heartbound.interaction;
 
 import com.heartbound.item.GiftItem;
+import com.heartbound.menu.RelationshipMenu;
 import com.heartbound.relationship.CooldownTracker;
+import com.heartbound.relationship.Gender;
 import com.heartbound.relationship.GiftPreferences;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RelationshipStage;
@@ -15,6 +17,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -23,7 +26,9 @@ import net.minecraft.world.level.Level;
 import java.util.Locale;
 
 /**
- * Handles right-clicking a mob: giving a gift (holding a gift item) and petting (sneaking with an empty hand).
+ * Handles right-clicking a mob:
+ * - sneaking: opens the relationship window;
+ * - holding a gift: gives the gift directly.
  * Each loader calls {@link #onUseEntity} from its own "player uses entity" event.
  * Returns PASS when the interaction is not ours, so vanilla behaviour is untouched.
  */
@@ -46,41 +51,65 @@ public final class InteractionHandler {
         if (!RomanceableMobs.isEligible(target)) {
             return InteractionResult.PASS;
         }
+        if (player.isShiftKeyDown()) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                openWindow(serverPlayer, target);
+            }
+            return InteractionResult.SUCCESS;
+        }
         ItemStack stack = player.getItemInHand(hand);
         if (stack.getItem() instanceof GiftItem gift) {
-            return handleGift(player, level, target, stack, gift);
-        }
-        if (stack.isEmpty() && player.isShiftKeyDown()) {
-            return handlePet(player, level, target);
+            if (player instanceof ServerPlayer serverPlayer) {
+                giveGift(serverPlayer, target, stack, gift);
+            }
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }
 
-    private static InteractionResult handleGift(Player player, Level level, Entity target, ItemStack stack, GiftItem gift) {
-        if (!(level instanceof ServerLevel serverLevel) || !(player instanceof ServerPlayer serverPlayer)) {
-            return InteractionResult.SUCCESS;
+    private static void openWindow(ServerPlayer player, Entity target) {
+        player.openMenu(new SimpleMenuProvider(
+                (containerId, inventory, p) -> new RelationshipMenu(containerId, inventory, target),
+                Component.translatable("screen.heartbound.relationship")));
+    }
+
+    /** Gives the gift in the player's main hand (used by the window button). */
+    public static boolean giveHeldGift(ServerPlayer player, Entity target) {
+        ItemStack stack = player.getMainHandItem();
+        if (stack.getItem() instanceof GiftItem gift) {
+            return giveGift(player, target, stack, gift);
+        }
+        player.displayClientMessage(Component.translatable("message.heartbound.need_gift"), true);
+        return false;
+    }
+
+    public static boolean giveGift(ServerPlayer player, Entity target, ItemStack stack, GiftItem gift) {
+        ServerLevel level = player.serverLevel();
+        if (!RomanceableMobs.isEligible(target)) {
+            return false;
         }
         if (!GIFT_COOLDOWNS.tryUse(player.getUUID(), target.getUUID(), level.getGameTime(), GIFT_COOLDOWN_TICKS)) {
-            return InteractionResult.SUCCESS;
+            return false;
         }
         String mobId = BuiltInRegistries.ENTITY_TYPE.getKey(target.getType()).getPath();
-        int gain = GiftPreferences.gain(mobId, gift.kind());
-        applyGain(serverLevel, serverPlayer, target, gain, 6 + gain / 10);
+        int gain = GiftPreferences.gain(mobId, Gender.of(target.getUUID()), gift.kind());
+        applyGain(level, player, target, gain, 6 + gain / 10);
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
-        return InteractionResult.SUCCESS;
+        return true;
     }
 
-    private static InteractionResult handlePet(Player player, Level level, Entity target) {
-        if (!(level instanceof ServerLevel serverLevel) || !(player instanceof ServerPlayer serverPlayer)) {
-            return InteractionResult.SUCCESS;
+    public static boolean pet(ServerPlayer player, Entity target) {
+        ServerLevel level = player.serverLevel();
+        if (!RomanceableMobs.isEligible(target)) {
+            return false;
         }
         if (!PET_COOLDOWNS.tryUse(player.getUUID(), target.getUUID(), level.getGameTime(), PET_COOLDOWN_TICKS)) {
-            return InteractionResult.SUCCESS;
+            return false;
         }
-        applyGain(serverLevel, serverPlayer, target, PET_GAIN, 3);
-        return InteractionResult.SUCCESS;
+        applyGain(level, player, target, PET_GAIN, 3);
+        return true;
     }
 
     private static void applyGain(ServerLevel level, ServerPlayer player, Entity target, int gain, int hearts) {

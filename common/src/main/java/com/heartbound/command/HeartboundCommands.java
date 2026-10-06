@@ -51,7 +51,7 @@ public final class HeartboundCommands {
     private static Entity resolveMob(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Entity mob = EntityArgument.getEntity(ctx, "mob");
         if (!RomanceableMobs.isSupportedType(mob)) {
-            throw error("This mob is not supported yet (villager, wolf, cat, fox).");
+            throw error("This mob is not supported yet (villager, wolf, cat, fox, piglin).");
         }
         if (!RomanceableMobs.isAdult(mob)) {
             throw error("Only adult mobs can have relationships.");
