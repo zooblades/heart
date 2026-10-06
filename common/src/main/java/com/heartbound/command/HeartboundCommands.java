@@ -17,9 +17,11 @@ import net.minecraft.world.entity.Entity;
 
 /**
  * Debug commands (operators only):
+ * <pre>{@code
  * /heartbound affinity get <mob>
  * /heartbound affinity set <mob> <value>
  * /heartbound affinity add <mob> <amount>
+ * }</pre>
  *
  * The affinity is always between the targeted mob and the player who runs the command.
  */
