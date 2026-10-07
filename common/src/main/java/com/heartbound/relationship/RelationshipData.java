@@ -25,6 +25,7 @@ public class RelationshipData extends SavedData {
     private final AffinityTable table = new AffinityTable();
     private final FollowTable following = new FollowTable();
     private final PartnerTable partners = new PartnerTable();
+    private final KnowledgeTable knowledge = new KnowledgeTable();
     private final Map<UUID, Home> homes = new HashMap<>();
 
     public RelationshipData() {
@@ -60,6 +61,13 @@ public class RelationshipData extends SavedData {
             CompoundTag entry = pairs.getCompound(i);
             if (entry.hasUUID("mob") && entry.hasUUID("player")) {
                 data.partners.pair(entry.getUUID("mob"), entry.getUUID("player"));
+            }
+        }
+        ListTag known = tag.getList("knowledge", Tag.TAG_COMPOUND);
+        for (int i = 0; i < known.size(); i++) {
+            CompoundTag entry = known.getCompound(i);
+            if (entry.hasUUID("mob") && entry.hasUUID("player")) {
+                data.knowledge.set(entry.getUUID("mob"), entry.getUUID("player"), entry.getInt("level"));
             }
         }
         ListTag homeList = tag.getList("homes", Tag.TAG_COMPOUND);
@@ -102,6 +110,16 @@ public class RelationshipData extends SavedData {
         }
         tag.put("partners", pairs);
 
+        ListTag known = new ListTag();
+        for (Map.Entry<AffinityTable.Key, Integer> e : knowledge.entries().entrySet()) {
+            CompoundTag entry = new CompoundTag();
+            entry.putUUID("mob", e.getKey().mob());
+            entry.putUUID("player", e.getKey().player());
+            entry.putInt("level", e.getValue());
+            known.add(entry);
+        }
+        tag.put("knowledge", known);
+
         ListTag homeList = new ListTag();
         for (Map.Entry<UUID, Home> e : homes.entrySet()) {
             CompoundTag entry = new CompoundTag();
@@ -136,7 +154,19 @@ public class RelationshipData extends SavedData {
         table.removeMob(mob);
         following.clear(mob);
         partners.unpairMob(mob);
+        knowledge.removeMob(mob);
         homes.remove(mob);
+        setDirty();
+    }
+
+    // ---- knowledge
+
+    public int getKnowledge(UUID mob, UUID player) {
+        return knowledge.get(mob, player);
+    }
+
+    public void setKnowledge(UUID mob, UUID player, int level) {
+        knowledge.set(mob, player, level);
         setDirty();
     }
 

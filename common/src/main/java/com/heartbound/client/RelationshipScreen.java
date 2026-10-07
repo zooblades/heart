@@ -1,6 +1,10 @@
 package com.heartbound.client;
 
+import com.heartbound.gesture.Personality;
 import com.heartbound.menu.RelationshipMenu;
+import com.heartbound.network.TalkPayload;
+import com.heartbound.relationship.GiftKind;
+import com.heartbound.talk.Topic;
 import com.heartbound.relationship.Gender;
 import com.heartbound.relationship.RelationshipStage;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,6 +16,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -71,6 +77,8 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
     private Button followButton;
     private Button proposeButton;
     private Button homeButton;
+    private boolean talkMode;
+    private final List<Button> talkButtons = new ArrayList<>();
 
     /** The bar value currently drawn; it glides towards the real affinity. */
     private float shownAffinity = -1F;
@@ -86,6 +94,14 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         super.init();
         int x = leftPos;
         int y = topPos;
+        followButton = null;
+        proposeButton = null;
+        homeButton = null;
+        talkButtons.clear();
+        if (talkMode) {
+            initTalk(x, y);
+            return;
+        }
         addRenderableWidget(new RoundedButton(x + 10, y + 116, 76, 20,
                 Component.translatable("button.heartbound.gift"), button -> press(RelationshipMenu.BUTTON_GIFT)));
         followButton = new RoundedButton(x + 91, y + 116, 76, 20,
@@ -97,6 +113,28 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         proposeButton = new RoundedButton(x + 10, y + 142, 76, 20,
                 Component.translatable("button.heartbound.propose"), button -> press(RelationshipMenu.BUTTON_PROPOSE));
         addRenderableWidget(proposeButton);
+        addRenderableWidget(new RoundedButton(x + 91, y + 142, 76, 20,
+                Component.translatable("button.heartbound.talk"), button -> {
+                    talkMode = true;
+                    rebuildWidgets();
+                }));
+    }
+
+    private void initTalk(int x, int y) {
+        Topic[] topics = Topic.values();
+        for (int i = 0; i < topics.length; i++) {
+            final Topic topic = topics[i];
+            Button button = new RoundedButton(x + 10 + (i % 3) * 81, y + 116 + (i / 3) * 26, 76, 20,
+                    Component.translatable("topic.heartbound." + topic.key()),
+                    b -> ClientHooks.send(new TalkPayload(menu.getTargetId(), topic.ordinal())));
+            talkButtons.add(button);
+            addRenderableWidget(button);
+        }
+        addRenderableWidget(new RoundedButton(x + 172, y + 142, 76, 20,
+                Component.translatable("button.heartbound.talk_back"), button -> {
+                    talkMode = false;
+                    rebuildWidgets();
+                }));
     }
 
     @Override
@@ -122,6 +160,10 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         }
         if (homeButton != null) {
             homeButton.active = menu.isPartner();
+        }
+        Topic[] topics = Topic.values();
+        for (int i = 0; i < talkButtons.size() && i < topics.length; i++) {
+            talkButtons.get(i).active = affinity >= topics[i].minAffinity();
         }
         super.render(g, mouseX, mouseY, partialTick);
     }
@@ -208,6 +250,19 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         g.drawString(font, Component.translatable("stage.heartbound." + stage.name().toLowerCase(Locale.ROOT)),
                 80, 38, menu.isPartner() ? TEXT_PARTNER : TEXT_STAGE, false);
         g.drawString(font, Component.literal(affinity + " / " + RelationshipStage.MAX_AFFINITY), 80, 50, TEXT_MAIN, false);
+
+        int knowledge = menu.getKnowledge();
+        Component character = Component.literal("???");
+        if (knowledge >= 1 && target != null) {
+            character = Component.translatable("personality.heartbound." + Personality.of(target.getUUID()).key());
+        }
+        Component favorite = Component.literal("???");
+        GiftKind gift = menu.getFavoriteGift();
+        if (knowledge >= 2 && gift != null) {
+            favorite = Component.translatable(gift == GiftKind.BOUQUET ? "item.heartbound.bouquet" : "item.heartbound.heart_charm");
+        }
+        g.drawString(font, Component.translatable("label.heartbound.character", character), 80, 76, TEXT_MAIN, false);
+        g.drawString(font, Component.translatable("label.heartbound.favorite_gift", favorite), 80, 88, TEXT_MAIN, false);
 
         g.drawString(font, Component.translatable("hint.heartbound.pet"), 10, 168, TEXT_HINT, false);
     }

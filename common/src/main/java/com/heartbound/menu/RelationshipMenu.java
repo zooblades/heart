@@ -1,8 +1,12 @@
 package com.heartbound.menu;
 
 import com.heartbound.interaction.InteractionHandler;
+import com.heartbound.config.HeartboundConfig;
 import com.heartbound.relationship.Gender;
+import com.heartbound.relationship.GiftKind;
+import com.heartbound.relationship.GiftPreferences;
 import com.heartbound.relationship.RelationshipData;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -33,7 +37,9 @@ public class RelationshipMenu extends AbstractContainerMenu {
     private static final int DATA_ENTITY_HIGH = 3;
     private static final int DATA_FOLLOWING = 4;
     private static final int DATA_PARTNER = 5;
-    private static final int DATA_COUNT = 6;
+    private static final int DATA_KNOWLEDGE = 6;
+    private static final int DATA_FAVORITE = 7;
+    private static final int DATA_COUNT = 8;
 
     private final ContainerData data;
     /** Only set on the server. */
@@ -63,6 +69,8 @@ public class RelationshipMenu extends AbstractContainerMenu {
         UUID mobId = target.getUUID();
         int gender = Gender.of(mobId).ordinal();
         int entityId = target.getId();
+        String mobPath = BuiltInRegistries.ENTITY_TYPE.getKey(target.getType()).getPath();
+        int favorite = GiftPreferences.favorite(mobPath, Gender.of(mobId), HeartboundConfig.get().giftGains).ordinal() + 1;
         return new ContainerData() {
             @Override
             public int get(int index) {
@@ -71,6 +79,8 @@ public class RelationshipMenu extends AbstractContainerMenu {
                     case DATA_GENDER -> gender;
                     case DATA_ENTITY_LOW -> entityId & 0xFFFF;
                     case DATA_ENTITY_HIGH -> entityId >>> 16;
+                    case DATA_KNOWLEDGE -> server == null ? 0 : RelationshipData.get(server).getKnowledge(mobId, playerId);
+                    case DATA_FAVORITE -> favorite;
                     case DATA_PARTNER -> server != null && RelationshipData.get(server).isPartner(mobId, playerId) ? 1 : 0;
                     case DATA_FOLLOWING -> server != null && playerId.equals(RelationshipData.get(server).getFollowTarget(mobId)) ? 1 : 0;
                     default -> 0;
@@ -96,6 +106,18 @@ public class RelationshipMenu extends AbstractContainerMenu {
         Gender[] values = Gender.values();
         int index = data.get(DATA_GENDER);
         return values[Math.max(0, Math.min(values.length - 1, index))];
+    }
+
+    /** 0 nothing known, 1 character known, 2 favourite gift known. */
+    public int getKnowledge() {
+        return data.get(DATA_KNOWLEDGE);
+    }
+
+    /** The favourite gift, or null if unknown. */
+    public GiftKind getFavoriteGift() {
+        int index = data.get(DATA_FAVORITE) - 1;
+        GiftKind[] kinds = GiftKind.values();
+        return index >= 0 && index < kinds.length ? kinds[index] : null;
     }
 
     public boolean isPartner() {

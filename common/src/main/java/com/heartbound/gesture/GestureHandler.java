@@ -105,7 +105,8 @@ public final class GestureHandler {
         UUID mobId = entity.getUUID();
         UUID playerId = player.getUUID();
         MOODS.recordSuccess(mobId, playerId);
-        data.add(mobId, playerId, gesture.gain());
+        boolean comfort = MobMood.isUpset(entity) && gesture != Gesture.LIE_DOWN;
+        data.add(mobId, playerId, gesture.gain() * (comfort ? 2 : 1));
 
         if (entity instanceof Mob mob) {
             mob.getLookControl().setLookAt(player, 30.0F, 30.0F);
@@ -129,8 +130,9 @@ public final class GestureHandler {
         if (gesture == Gesture.HOLD_HANDS) {
             StageBehaviors.holdHands(mobId, playerId, now + HeartboundConfig.get().holdHandsSeconds * 20L);
         }
-        player.displayClientMessage(
-                Component.translatable("gesture.heartbound.success." + gesture.key(), entity.getName()), true);
+        player.displayClientMessage(Component.translatable(
+                comfort ? "gesture.heartbound.comfort" : "gesture.heartbound.success." + gesture.key(),
+                entity.getName()), true);
     }
 
     private static void refuse(ServerLevel level, ServerPlayer player, Entity entity,

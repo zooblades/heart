@@ -12,6 +12,8 @@ import com.heartbound.network.GesturePayload;
 import com.heartbound.network.OpenRadialPayload;
 import com.heartbound.network.OpenRelationshipPayload;
 import com.heartbound.network.RadialInfoPayload;
+import com.heartbound.network.TalkPayload;
+import com.heartbound.talk.TalkHandler;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -65,6 +67,12 @@ public class HeartboundNeoForge {
                 (payload, context) -> context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer serverPlayer) {
                         GestureHandler.perform(serverPlayer, payload.entityId(), payload.gesture());
+                    }
+                }));
+        registrar.playToServer(TalkPayload.TYPE, TalkPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        TalkHandler.perform(serverPlayer, payload.entityId(), payload.topic());
                     }
                 }));
         registrar.playToClient(RadialInfoPayload.TYPE, RadialInfoPayload.STREAM_CODEC,

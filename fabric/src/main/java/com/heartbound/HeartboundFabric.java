@@ -11,6 +11,8 @@ import com.heartbound.network.GesturePayload;
 import com.heartbound.network.OpenRadialPayload;
 import com.heartbound.network.OpenRelationshipPayload;
 import com.heartbound.network.RadialInfoPayload;
+import com.heartbound.network.TalkPayload;
+import com.heartbound.talk.TalkHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -47,6 +49,10 @@ public class HeartboundFabric implements ModInitializer {
                 context.server().execute(() -> GestureHandler.requestRadial(context.player(), payload.entityId())));
         ServerPlayNetworking.registerGlobalReceiver(GesturePayload.TYPE, (payload, context) ->
                 context.server().execute(() -> GestureHandler.perform(context.player(), payload.entityId(), payload.gesture())));
+
+        PayloadTypeRegistry.playC2S().register(TalkPayload.TYPE, TalkPayload.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(TalkPayload.TYPE, (payload, context) ->
+                context.server().execute(() -> TalkHandler.perform(context.player(), payload.entityId(), payload.topic())));
 
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries ->
                 ModItems.all().values().forEach(item -> entries.accept(item)));

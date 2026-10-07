@@ -54,6 +54,20 @@ public final class GiftPreferences {
         return DEFAULT_GAINS.get(kind);
     }
 
+    /** The gift this mob likes best (the first one on a tie). */
+    public static GiftKind favorite(String mobId, Gender gender, Map<String, Map<String, Integer>> overrides) {
+        GiftKind best = GiftKind.values()[0];
+        int bestGain = Integer.MIN_VALUE;
+        for (GiftKind kind : GiftKind.values()) {
+            int gain = gain(mobId, gender, kind, overrides);
+            if (gain > bestGain) {
+                bestGain = gain;
+                best = kind;
+            }
+        }
+        return best;
+    }
+
     private static Integer override(Map<String, Map<String, Integer>> overrides, String key, String giftName) {
         if (overrides == null) {
             return null;
