@@ -1,5 +1,6 @@
 package com.heartbound.client;
 
+import com.heartbound.network.OpenRadialPayload;
 import com.heartbound.network.OpenRelationshipPayload;
 import com.heartbound.relationship.RomanceableMobs;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -11,15 +12,19 @@ import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.world.entity.Entity;
 
 /**
- * The "open relationship window" key (default F, rebindable in Controls).
- *
- * F is also vanilla's "swap with offhand". To keep both working, the key is read directly, and when
- * the two bindings share a key: looking at a mob opens the window, otherwise the offhand swap runs.
+ * Mod keys:
+ * - OPEN_KEY (default F): opens the relationship window. F is also vanilla's "swap with offhand", so the
+ *   key is read directly: looking at a mob opens the window, otherwise the offhand swap runs.
+ * - GESTURE_KEY (default G): hold to open the gesture menu, release over a sector to choose.
+ * Both are rebindable in Controls.
  */
 public final class KeyHandler {
 
     public static final KeyMapping OPEN_KEY = new KeyMapping(
             "key.heartbound.open", InputConstants.Type.KEYSYM, InputConstants.KEY_F, "key.categories.heartbound");
+
+    public static final KeyMapping GESTURE_KEY = new KeyMapping(
+            "key.heartbound.gestures", InputConstants.Type.KEYSYM, InputConstants.KEY_G, "key.categories.heartbound");
 
     private static boolean wasDown;
 
@@ -31,6 +36,17 @@ public final class KeyHandler {
         if (mc.player == null || mc.level == null) {
             wasDown = false;
             return;
+        }
+
+        boolean gesturePressed = false;
+        while (GESTURE_KEY.consumeClick()) {
+            gesturePressed = true;
+        }
+        if (gesturePressed && mc.screen == null) {
+            Entity target = mc.crosshairPickEntity;
+            if (target != null && RomanceableMobs.isEligible(target)) {
+                ClientHooks.send(new OpenRadialPayload(target.getId()));
+            }
         }
 
         boolean pressed = false;

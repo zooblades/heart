@@ -25,6 +25,7 @@ public final class HeartboundNeoForgeClient {
     @SubscribeEvent
     public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
         event.register(KeyHandler.OPEN_KEY);
+        event.register(KeyHandler.GESTURE_KEY);
         ClientHooks.sender = payload -> PacketDistributor.sendToServer(payload);
     }
 }

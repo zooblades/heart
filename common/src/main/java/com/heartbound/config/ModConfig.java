@@ -17,6 +17,8 @@ public final class ModConfig {
     public double followTeleportDistance = 24.0;
     public int morningBonusSeconds = 30;
     public int morningBonusXp = 15;
+    public int gestureCooldownTicks = 60;
+    public int gesturePenalty = 3;
 
     /**
      * Optional gift overrides. Key: mob id ("fox") or mob id and gender ("piglin/female").
@@ -33,6 +35,8 @@ public final class ModConfig {
         followTeleportDistance = Math.max(8.0, Math.min(128.0, followTeleportDistance));
         morningBonusSeconds = clamp(morningBonusSeconds, 0, 600);
         morningBonusXp = clamp(morningBonusXp, 0, 1000);
+        gestureCooldownTicks = clamp(gestureCooldownTicks, 0, 6000);
+        gesturePenalty = clamp(gesturePenalty, 0, 1000);
 
         if (giftGains == null) {
             giftGains = new LinkedHashMap<>();

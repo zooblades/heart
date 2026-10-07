@@ -49,7 +49,18 @@ public final class StageBehaviors {
     /** Player to partner mob, for players who are asleep with their partner nearby. */
     private static final Map<UUID, UUID> SLEPT_NEAR_PARTNER = new HashMap<>();
 
+    /** Mobs currently holding hands with a player (transient, not saved). */
+    private static final Map<UUID, HandHold> HAND_HOLDS = new HashMap<>();
+
+    private record HandHold(UUID player, long untilTick) {
+    }
+
     private StageBehaviors() {
+    }
+
+    /** Makes the mob walk right beside the player until the given game tick. */
+    public static void holdHands(UUID mob, UUID player, long untilTick) {
+        HAND_HOLDS.put(mob, new HandHold(player, untilTick));
     }
 
     public static void tick(MinecraftServer server) {
@@ -59,6 +70,7 @@ public final class StageBehaviors {
         RelationshipData data = RelationshipData.get(server);
         followTick(server, data);
         homeTick(server, data);
+        handTick(server);
         partnerTick(server, data);
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             nearbyTick(player, data);
@@ -95,6 +107,33 @@ public final class StageBehaviors {
                 mob.getNavigation().stop();
                 mob.teleportTo(player.getX(), player.getY(), player.getZ());
             } else if (distanceSqr > FOLLOW_STOP_DISTANCE_SQR) {
+                moveToward(mob, player);
+            }
+        }
+    }
+
+    // ---- holding hands
+
+    private static void handTick(MinecraftServer server) {
+        if (HAND_HOLDS.isEmpty()) {
+            return;
+        }
+        long now = server.overworld().getGameTime();
+        for (Map.Entry<UUID, HandHold> entry : new HashMap<>(HAND_HOLDS).entrySet()) {
+            HandHold hold = entry.getValue();
+            ServerPlayer player = server.getPlayerList().getPlayer(hold.player());
+            Entity found = findEntity(server, entry.getKey());
+            if (player == null || now > hold.untilTick()
+                    || !(found instanceof Mob mob) || !mob.isAlive() || mob.isPassenger()
+                    || mob.level() != player.level()) {
+                HAND_HOLDS.remove(entry.getKey());
+                continue;
+            }
+            double distanceSqr = mob.distanceToSqr(player);
+            if (distanceSqr > 12.0D * 12.0D) {
+                mob.getNavigation().stop();
+                mob.teleportTo(player.getX(), player.getY(), player.getZ());
+            } else if (distanceSqr > 2.0D * 2.0D) {
                 moveToward(mob, player);
             }
         }

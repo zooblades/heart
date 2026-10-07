@@ -6,7 +6,12 @@ import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.item.ModItems;
 import com.heartbound.menu.ModMenus;
 import com.heartbound.menu.RelationshipMenu;
+import com.heartbound.client.RadialClient;
+import com.heartbound.gesture.GestureHandler;
+import com.heartbound.network.GesturePayload;
+import com.heartbound.network.OpenRadialPayload;
 import com.heartbound.network.OpenRelationshipPayload;
+import com.heartbound.network.RadialInfoPayload;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -50,6 +55,20 @@ public class HeartboundNeoForge {
 
     private static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
+        registrar.playToServer(OpenRadialPayload.TYPE, OpenRadialPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        GestureHandler.requestRadial(serverPlayer, payload.entityId());
+                    }
+                }));
+        registrar.playToServer(GesturePayload.TYPE, GesturePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        GestureHandler.perform(serverPlayer, payload.entityId(), payload.gesture());
+                    }
+                }));
+        registrar.playToClient(RadialInfoPayload.TYPE, RadialInfoPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> RadialClient.open(payload)));
         registrar.playToServer(OpenRelationshipPayload.TYPE, OpenRelationshipPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer serverPlayer) {
