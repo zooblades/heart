@@ -10,17 +10,17 @@ import java.util.Map;
 public final class GiftPreferences {
 
     private static final Map<GiftKind, Integer> DEFAULT_GAINS = Map.of(
-            GiftKind.BOUQUET, 8,
-            GiftKind.HEART_CHARM, 25
+            GiftKind.BOUQUET, 20,
+            GiftKind.HEART_CHARM, 60
     );
 
     private static final Map<String, Map<GiftKind, Integer>> TABLE = Map.of(
-            "villager", Map.of(GiftKind.BOUQUET, 10, GiftKind.HEART_CHARM, 25),
-            "wolf", Map.of(GiftKind.BOUQUET, 5, GiftKind.HEART_CHARM, 35),
-            "cat", Map.of(GiftKind.BOUQUET, 8, GiftKind.HEART_CHARM, 30),
-            "fox", Map.of(GiftKind.BOUQUET, 14, GiftKind.HEART_CHARM, 22),
-            "piglin/female", Map.of(GiftKind.BOUQUET, 14, GiftKind.HEART_CHARM, 22),
-            "piglin/male", Map.of(GiftKind.BOUQUET, 4, GiftKind.HEART_CHARM, 38)
+            "villager", Map.of(GiftKind.BOUQUET, 25, GiftKind.HEART_CHARM, 60),
+            "wolf", Map.of(GiftKind.BOUQUET, 12, GiftKind.HEART_CHARM, 80),
+            "cat", Map.of(GiftKind.BOUQUET, 20, GiftKind.HEART_CHARM, 70),
+            "fox", Map.of(GiftKind.BOUQUET, 30, GiftKind.HEART_CHARM, 55),
+            "piglin/female", Map.of(GiftKind.BOUQUET, 30, GiftKind.HEART_CHARM, 55),
+            "piglin/male", Map.of(GiftKind.BOUQUET, 10, GiftKind.HEART_CHARM, 85)
     );
 
     private GiftPreferences() {

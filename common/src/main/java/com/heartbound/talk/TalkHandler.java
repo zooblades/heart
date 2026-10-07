@@ -7,6 +7,7 @@ import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RomanceableMobs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -74,6 +75,10 @@ public final class TalkHandler {
         } else {
             ok = level.random.nextInt(100) < TalkRules.chance(topic, affinity, partner, personality);
             key = DialogueBook.key(topic, ok, personality, variant);
+            String mobPath = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
+            if (ok && topic == Topic.ABOUT_YOU && DialogueBook.hasSpecies(mobPath) && level.random.nextBoolean()) {
+                key = DialogueBook.speciesKey(mobPath, level.random.nextInt(DialogueBook.SPECIES_VARIANTS));
+            }
             gain = ok ? topic.gain() : (topic == Topic.FLIRT ? -FLIRT_FAIL_PENALTY : 0);
         }
         if (gain > 0) {

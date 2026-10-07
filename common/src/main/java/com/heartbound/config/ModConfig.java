@@ -10,13 +10,13 @@ import java.util.Map;
 public final class ModConfig {
 
     /** Bumped when defaults change; older config files are reset to the new defaults. */
-    public static final int CURRENT_VERSION = 2;
+    public static final int CURRENT_VERSION = 3;
 
     public int configVersion = CURRENT_VERSION;
 
-    public int giftCooldownTicks = 3600;
-    public int petCooldownTicks = 1200;
-    public int petGain = 2;
+    public int giftCooldownTicks = 1200;
+    public int petCooldownTicks = 600;
+    public int petGain = 3;
     public int maxFollowers = 3;
     public int breakupAffinity = 300;
     public double followTeleportDistance = 24.0;

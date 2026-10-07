@@ -17,12 +17,13 @@ import com.heartbound.talk.TalkHandler;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -40,7 +41,6 @@ public class HeartboundNeoForge {
         ModMenus.init(IMenuTypeExtension.create((containerId, inventory, buffer) -> new RelationshipMenu(containerId, inventory)));
 
         modEventBus.addListener(HeartboundNeoForge::onRegister);
-        modEventBus.addListener(HeartboundNeoForge::onCreativeTab);
         modEventBus.addListener(HeartboundNeoForge::onRegisterPayloads);
 
         NeoForge.EVENT_BUS.addListener(HeartboundNeoForge::onRegisterCommands);
@@ -51,6 +51,12 @@ public class HeartboundNeoForge {
     private static void onRegister(RegisterEvent event) {
         event.register(Registries.ITEM, helper ->
                 ModItems.all().forEach((name, item) -> helper.register(ModItems.id(name), item)));
+        event.register(Registries.CREATIVE_MODE_TAB, helper ->
+                helper.register(ModItems.id("main"), CreativeModeTab.builder()
+                        .title(Component.translatable("itemGroup.heartbound"))
+                        .icon(() -> new ItemStack(ModItems.HEART_CHARM))
+                        .displayItems((parameters, output) -> ModItems.fillTab(output))
+                        .build()));
         event.register(Registries.MENU, helper ->
                 helper.register(ModMenus.id(ModMenus.RELATIONSHIP_NAME), ModMenus.RELATIONSHIP));
     }
@@ -83,12 +89,6 @@ public class HeartboundNeoForge {
                         InteractionHandler.openFromKey(serverPlayer, payload.entityId());
                     }
                 }));
-    }
-
-    private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-            ModItems.all().values().forEach(item -> event.accept(item));
-        }
     }
 
     private static void onRegisterCommands(RegisterCommandsEvent event) {

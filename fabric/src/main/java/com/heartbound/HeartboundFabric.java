@@ -17,14 +17,15 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 public class HeartboundFabric implements ModInitializer {
 
@@ -54,8 +55,12 @@ public class HeartboundFabric implements ModInitializer {
         ServerPlayNetworking.registerGlobalReceiver(TalkPayload.TYPE, (payload, context) ->
                 context.server().execute(() -> TalkHandler.perform(context.player(), payload.entityId(), payload.topic())));
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries ->
-                ModItems.all().values().forEach(item -> entries.accept(item)));
+        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ModItems.id("main"),
+                FabricItemGroup.builder()
+                        .title(Component.translatable("itemGroup.heartbound"))
+                        .icon(() -> new ItemStack(ModItems.HEART_CHARM))
+                        .displayItems((parameters, output) -> ModItems.fillTab(output))
+                        .build());
 
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, registryAccess, environment) -> HeartboundCommands.register(dispatcher));

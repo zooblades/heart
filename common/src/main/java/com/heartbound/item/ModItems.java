@@ -3,6 +3,7 @@ package com.heartbound.item;
 import com.heartbound.Constants;
 import com.heartbound.relationship.GiftKind;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 
 import java.util.Collections;
@@ -33,6 +34,11 @@ public final class ModItems {
     /** Registry name (path) to item, in creative tab order. */
     public static Map<String, Item> all() {
         return Collections.unmodifiableMap(ALL);
+    }
+
+    /** Puts all mod items into the mod's creative tab. */
+    public static void fillTab(CreativeModeTab.Output output) {
+        ALL.values().forEach(item -> output.accept(item));
     }
 
     public static ResourceLocation id(String path) {

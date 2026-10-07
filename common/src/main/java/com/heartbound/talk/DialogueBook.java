@@ -11,7 +11,12 @@ import java.util.List;
  */
 public final class DialogueBook {
 
-    public static final int VARIANTS = 2;
+    /** Lines per (topic, outcome, character). */
+    public static final int VARIANTS = 4;
+    /** Extra "about me" lines per supported species. */
+    public static final int SPECIES_VARIANTS = 2;
+    public static final List<String> SPECIES = List.of("villager", "wolf", "cat", "fox", "piglin");
+
     private static final String PREFIX = "dialogue.heartbound.";
 
     private DialogueBook() {
@@ -29,6 +34,14 @@ public final class DialogueBook {
         return PREFIX + "tired." + personality.key() + "." + variant;
     }
 
+    public static boolean hasSpecies(String mobPath) {
+        return SPECIES.contains(mobPath);
+    }
+
+    public static String speciesKey(String mobPath, int variant) {
+        return PREFIX + "about_you.species." + mobPath + "." + variant;
+    }
+
     /** Every key that must exist in the language files. */
     public static List<String> allKeys() {
         List<String> keys = new ArrayList<>();
@@ -42,6 +55,11 @@ public final class DialogueBook {
                 }
                 keys.add(comfortKey(personality, v));
                 keys.add(tiredKey(personality, v));
+            }
+        }
+        for (String species : SPECIES) {
+            for (int v = 0; v < SPECIES_VARIANTS; v++) {
+                keys.add(speciesKey(species, v));
             }
         }
         return keys;
