@@ -32,8 +32,8 @@ class GiftPreferencesTest {
 
     @Test
     void unknownMobFallsBackToDefault() {
-        assertEquals(20, GiftPreferences.gain("axolotl", Gender.FEMALE, GiftKind.BOUQUET));
-        assertEquals(60, GiftPreferences.gain("axolotl", Gender.MALE, GiftKind.HEART_CHARM));
+        assertEquals(8, GiftPreferences.gain("axolotl", Gender.FEMALE, GiftKind.BOUQUET));
+        assertEquals(25, GiftPreferences.gain("axolotl", Gender.MALE, GiftKind.HEART_CHARM));
     }
 
     @Test

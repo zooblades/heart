@@ -56,7 +56,8 @@ public final class GestureHandler {
         int affinity = data.get(entity.getUUID(), player.getUUID());
         boolean partner = data.isPartner(entity.getUUID(), player.getUUID());
         player.connection.send(new ClientboundCustomPayloadPacket(
-                new RadialInfoPayload(entity.getId(), affinity, partner)));
+                new RadialInfoPayload(entity.getId(), affinity, partner,
+                        StageBehaviors.isHoldingHands(entity.getUUID()))));
     }
 
     public static void perform(ServerPlayer player, int entityId, int gestureId) {
@@ -69,6 +70,11 @@ public final class GestureHandler {
         RelationshipData data = RelationshipData.get(player.getServer());
         UUID mobId = entity.getUUID();
         UUID playerId = player.getUUID();
+        if (gesture == Gesture.HOLD_HANDS && StageBehaviors.isHoldingHands(mobId)) {
+            StageBehaviors.releaseHands(mobId);
+            player.displayClientMessage(Component.translatable("gesture.heartbound.released", entity.getName()), true);
+            return;
+        }
         int affinity = data.get(mobId, playerId);
         boolean partner = data.isPartner(mobId, playerId);
 
@@ -121,7 +127,7 @@ public final class GestureHandler {
             player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 0));
         }
         if (gesture == Gesture.HOLD_HANDS) {
-            StageBehaviors.holdHands(mobId, playerId, now + 1200L);
+            StageBehaviors.holdHands(mobId, playerId, now + HeartboundConfig.get().holdHandsSeconds * 20L);
         }
         player.displayClientMessage(
                 Component.translatable("gesture.heartbound.success." + gesture.key(), entity.getName()), true);

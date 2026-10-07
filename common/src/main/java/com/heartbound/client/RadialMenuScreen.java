@@ -37,15 +37,17 @@ public class RadialMenuScreen extends Screen {
     private final int entityId;
     private final int affinity;
     private final boolean partner;
+    private final boolean holding;
 
     private int lastMouseX;
     private int lastMouseY;
 
-    public RadialMenuScreen(int entityId, int affinity, boolean partner) {
+    public RadialMenuScreen(int entityId, int affinity, boolean partner, boolean holding) {
         super(Component.translatable("key.heartbound.gestures"));
         this.entityId = entityId;
         this.affinity = affinity;
         this.partner = partner;
+        this.holding = holding;
         buildRuns();
     }
 
@@ -100,7 +102,7 @@ public class RadialMenuScreen extends Screen {
     }
 
     private boolean isEnabled(int sector) {
-        if (sector == BACK) {
+        if (sector == BACK || (sector == 0 && holding)) {
             return true;
         }
         Gesture gesture = gestureOf(sector);
@@ -148,7 +150,7 @@ public class RadialMenuScreen extends Screen {
             boolean enabled = isEnabled(i);
             int color = enabled ? 0xFFFFFFFF : 0xFF7B8594;
 
-            Component label = Component.translatable("gesture.heartbound." + (i == BACK ? "back" : gestureOf(i).key()));
+            Component label = Component.translatable("gesture.heartbound." + (i == BACK ? "back" : (i == 0 && holding ? "release" : gestureOf(i).key())));
             g.drawCenteredString(font, label, lx, ly - 8, color);
 
             Component sub = subLabel(i);
@@ -174,6 +176,9 @@ public class RadialMenuScreen extends Screen {
     }
 
     private Component subLabel(int sector) {
+        if (sector == 0 && holding) {
+            return null;
+        }
         Gesture gesture = gestureOf(sector);
         if (gesture == null) {
             return null;

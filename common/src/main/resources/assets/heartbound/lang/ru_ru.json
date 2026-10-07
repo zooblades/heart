@@ -55,5 +55,7 @@
   "gesture.heartbound.refused.shy": "%1$s смущается и отступает",
   "gesture.heartbound.refused.neutral": "%1$s сейчас не в настроении",
   "gesture.heartbound.refused.bold": "%1$s качает головой",
-  "gesture.heartbound.refused.playful": "%1$s со смехом уворачивается"
+  "gesture.heartbound.refused.playful": "%1$s со смехом уворачивается",
+  "gesture.heartbound.release": "Отпустить",
+  "gesture.heartbound.released": "%1$s отпускает вашу руку"
 }

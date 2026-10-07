@@ -9,15 +9,23 @@ import java.util.Map;
  */
 public final class ModConfig {
 
-    public int giftCooldownTicks = 20;
-    public int petCooldownTicks = 100;
-    public int petGain = 3;
+    /** Bumped when defaults change; older config files are reset to the new defaults. */
+    public static final int CURRENT_VERSION = 2;
+
+    public int configVersion = CURRENT_VERSION;
+
+    public int giftCooldownTicks = 3600;
+    public int petCooldownTicks = 1200;
+    public int petGain = 2;
     public int maxFollowers = 3;
     public int breakupAffinity = 300;
     public double followTeleportDistance = 24.0;
     public int morningBonusSeconds = 30;
     public int morningBonusXp = 15;
-    public int gestureCooldownTicks = 60;
+    public int gestureCooldownTicks = 200;
+    public int holdHandsSeconds = 30;
+    /** Life intensity: 0 off, 1 rare, 2 normal, 3 lively. */
+    public int lifeIntensity = 2;
     public int gesturePenalty = 3;
 
     /**
@@ -37,6 +45,8 @@ public final class ModConfig {
         morningBonusXp = clamp(morningBonusXp, 0, 1000);
         gestureCooldownTicks = clamp(gestureCooldownTicks, 0, 6000);
         gesturePenalty = clamp(gesturePenalty, 0, 1000);
+        holdHandsSeconds = clamp(holdHandsSeconds, 5, 600);
+        lifeIntensity = clamp(lifeIntensity, 0, 3);
 
         if (giftGains == null) {
             giftGains = new LinkedHashMap<>();

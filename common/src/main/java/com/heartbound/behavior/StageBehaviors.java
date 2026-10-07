@@ -1,6 +1,7 @@
 package com.heartbound.behavior;
 
 import com.heartbound.config.HeartboundConfig;
+import com.heartbound.life.LifeDirector;
 import com.heartbound.relationship.Home;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RelationshipStage;
@@ -58,6 +59,14 @@ public final class StageBehaviors {
     private StageBehaviors() {
     }
 
+    public static boolean isHoldingHands(UUID mob) {
+        return HAND_HOLDS.containsKey(mob);
+    }
+
+    public static void releaseHands(UUID mob) {
+        HAND_HOLDS.remove(mob);
+    }
+
     /** Makes the mob walk right beside the player until the given game tick. */
     public static void holdHands(UUID mob, UUID player, long untilTick) {
         HAND_HOLDS.put(mob, new HandHold(player, untilTick));
@@ -72,6 +81,9 @@ public final class StageBehaviors {
         homeTick(server, data);
         handTick(server);
         partnerTick(server, data);
+        if (server.getTickCount() % 20 == 0) {
+            LifeDirector.tick(server, data);
+        }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             nearbyTick(player, data);
             sleepTick(player, data);

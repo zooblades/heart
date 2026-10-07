@@ -12,7 +12,7 @@ public final class RadialClient {
     public static void open(RadialInfoPayload info) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null && mc.player != null && mc.screen == null) {
-            mc.setScreen(new RadialMenuScreen(info.entityId(), info.affinity(), info.partner()));
+            mc.setScreen(new RadialMenuScreen(info.entityId(), info.affinity(), info.partner(), info.holding()));
         }
     }
 }

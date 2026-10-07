@@ -55,5 +55,7 @@
   "gesture.heartbound.refused.shy": "%1$s blushes and steps back",
   "gesture.heartbound.refused.neutral": "%1$s is not in the mood",
   "gesture.heartbound.refused.bold": "%1$s shakes their head",
-  "gesture.heartbound.refused.playful": "%1$s laughs and dodges"
+  "gesture.heartbound.refused.playful": "%1$s laughs and dodges",
+  "gesture.heartbound.release": "Let go",
+  "gesture.heartbound.released": "%1$s lets go of your hand"
 }
