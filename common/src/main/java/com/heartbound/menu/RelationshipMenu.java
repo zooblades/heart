@@ -120,6 +120,11 @@ public class RelationshipMenu extends AbstractContainerMenu {
         return index >= 0 && index < kinds.length ? kinds[index] : null;
     }
 
+    /** The mob this window is about; only available on the server. */
+    public Entity getTargetEntity() {
+        return target;
+    }
+
     public boolean isPartner() {
         return data.get(DATA_PARTNER) == 1;
     }

@@ -73,6 +73,7 @@ public final class StageBehaviors {
     }
 
     public static void tick(MinecraftServer server) {
+        FreezeManager.tick(server);
         if (server.getTickCount() % INTERVAL_TICKS != 0) {
             return;
         }
@@ -110,7 +111,8 @@ public final class StageBehaviors {
                 data.stopFollowing(mobId);
                 continue;
             }
-            if (mob.level() != player.level() || mob.isPassenger() || isSitting(mob)) {
+            if (mob.level() != player.level() || mob.isPassenger() || isSitting(mob)
+                    || FreezeManager.isFrozen(mobId)) {
                 continue;
             }
 
@@ -141,6 +143,9 @@ public final class StageBehaviors {
                 HAND_HOLDS.remove(entry.getKey());
                 continue;
             }
+            if (FreezeManager.isFrozen(entry.getKey())) {
+                continue;
+            }
             double distanceSqr = mob.distanceToSqr(player);
             if (distanceSqr > 12.0D * 12.0D) {
                 mob.getNavigation().stop();
@@ -156,7 +161,8 @@ public final class StageBehaviors {
     private static void homeTick(MinecraftServer server, RelationshipData data) {
         for (Map.Entry<UUID, Home> entry : data.homesSnapshot().entrySet()) {
             Entity found = findEntity(server, entry.getKey());
-            if (!(found instanceof Mob mob) || !mob.isAlive() || mob.isPassenger() || isSitting(mob)) {
+            if (!(found instanceof Mob mob) || !mob.isAlive() || mob.isPassenger() || isSitting(mob)
+                    || FreezeManager.isFrozen(entry.getKey())) {
                 continue;
             }
             Home home = entry.getValue();

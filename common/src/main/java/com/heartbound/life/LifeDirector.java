@@ -1,5 +1,6 @@
 package com.heartbound.life;
 
+import com.heartbound.behavior.FreezeManager;
 import com.heartbound.behavior.StageBehaviors;
 import com.heartbound.config.HeartboundConfig;
 import com.heartbound.gesture.Personality;
@@ -75,6 +76,7 @@ public final class LifeDirector {
     private static boolean allowed(Mob mob, RelationshipData data, ServerPlayer player) {
         UUID id = mob.getUUID();
         return !mob.isSleeping()
+                && !FreezeManager.isFrozen(id)
                 && !mob.isPassenger()
                 && mob.getTarget() == null
                 && data.getFollowTarget(id) == null

@@ -1,5 +1,6 @@
 package com.heartbound.gesture;
 
+import com.heartbound.behavior.FreezeManager;
 import com.heartbound.behavior.StageBehaviors;
 import com.heartbound.config.HeartboundConfig;
 import com.heartbound.network.RadialInfoPayload;
@@ -55,6 +56,7 @@ public final class GestureHandler {
         RelationshipData data = RelationshipData.get(player.getServer());
         int affinity = data.get(entity.getUUID(), player.getUUID());
         boolean partner = data.isPartner(entity.getUUID(), player.getUUID());
+        FreezeManager.freezeUntil(entity.getUUID(), player.serverLevel().getGameTime() + 80L);
         player.connection.send(new ClientboundCustomPayloadPacket(
                 new RadialInfoPayload(entity.getId(), affinity, partner,
                         StageBehaviors.isHoldingHands(entity.getUUID()))));
@@ -70,6 +72,7 @@ public final class GestureHandler {
         RelationshipData data = RelationshipData.get(player.getServer());
         UUID mobId = entity.getUUID();
         UUID playerId = player.getUUID();
+        FreezeManager.freezeUntil(mobId, level.getGameTime() + 40L);
         if (gesture == Gesture.HOLD_HANDS && StageBehaviors.isHoldingHands(mobId)) {
             StageBehaviors.releaseHands(mobId);
             player.displayClientMessage(Component.translatable("gesture.heartbound.released", entity.getName()), true);
