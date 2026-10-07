@@ -37,7 +37,7 @@ class GestureRulesTest {
                 }
             }
         }
-        assertEquals(GestureRules.MIN_CHANCE,
-                GestureRules.chance(Gesture.LIE_DOWN, 0, false, Personality.SHY));
+        // base 60, no bonus, shy: -7 * intimacy 4 = -28
+        assertEquals(32, GestureRules.chance(Gesture.LIE_DOWN, 0, false, Personality.SHY));
     }
 }
