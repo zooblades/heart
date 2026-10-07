@@ -28,3 +28,12 @@ Edit `gradle.properties`: set `mod_author` (and `group` / `license` if you want 
 ## Roadmap
 
 See GDD.md.
+
+## Config
+
+On first launch the mod writes `config/heartbound.json` (cooldowns, gains, follower limit, morning bonus,
+gift overrides). Edit it and restart the game. Gift overrides use mob ids and optionally gender:
+
+```json
+"giftGains": { "fox": { "bouquet": 45 }, "piglin/female": { "heart_charm": 70 } }
+```

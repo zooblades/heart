@@ -11,6 +11,9 @@ public interface IPlatformHelper {
     /** Whether the game is running in a development environment. */
     boolean isDevelopmentEnvironment();
 
+    /** The loader's config folder. */
+    java.nio.file.Path getConfigDir();
+
     default String getEnvironmentName() {
         return isDevelopmentEnvironment() ? "development" : "production";
     }

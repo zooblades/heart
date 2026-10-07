@@ -1,5 +1,6 @@
 package com.heartbound.behavior;
 
+import com.heartbound.config.HeartboundConfig;
 import com.heartbound.relationship.Home;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RelationshipStage;
@@ -40,13 +41,10 @@ public final class StageBehaviors {
     public static final int INTERVAL_TICKS = 10;
     public static final double NEAR_RADIUS = 6.0D;
     public static final double FOLLOW_STOP_DISTANCE_SQR = 3.0D * 3.0D;
-    public static final double FOLLOW_TELEPORT_DISTANCE_SQR = 24.0D * 24.0D;
     public static final double HOME_RADIUS_SQR = 6.0D * 6.0D;
     public static final double HOME_TELEPORT_DISTANCE_SQR = 48.0D * 48.0D;
     public static final double SLEEP_NEAR_DISTANCE_SQR = 10.0D * 10.0D;
     public static final int DEFEND_WINDOW_TICKS = 100;
-    public static final int MORNING_BONUS_TICKS = 600;
-    public static final int MORNING_BONUS_XP = 15;
 
     /** Player to partner mob, for players who are asleep with their partner nearby. */
     private static final Map<UUID, UUID> SLEPT_NEAR_PARTNER = new HashMap<>();
@@ -93,7 +91,7 @@ public final class StageBehaviors {
             }
 
             double distanceSqr = mob.distanceToSqr(player);
-            if (distanceSqr > FOLLOW_TELEPORT_DISTANCE_SQR) {
+            if (distanceSqr > followTeleportSqr()) {
                 mob.getNavigation().stop();
                 mob.teleportTo(player.getX(), player.getY(), player.getZ());
             } else if (distanceSqr > FOLLOW_STOP_DISTANCE_SQR) {
@@ -165,8 +163,8 @@ public final class StageBehaviors {
 
     private static void morning(ServerPlayer player, UUID mobId) {
         ServerLevel level = player.serverLevel();
-        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, MORNING_BONUS_TICKS, 1));
-        player.giveExperiencePoints(MORNING_BONUS_XP);
+        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, HeartboundConfig.get().morningBonusSeconds * 20, 1));
+        player.giveExperiencePoints(HeartboundConfig.get().morningBonusXp);
         Entity partner = level.getEntity(mobId);
         if (partner != null) {
             level.sendParticles(ParticleTypes.HEART,
@@ -176,6 +174,11 @@ public final class StageBehaviors {
     }
 
     // ---- helpers
+
+    private static double followTeleportSqr() {
+        double distance = HeartboundConfig.get().followTeleportDistance;
+        return distance * distance;
+    }
 
     private static boolean isSitting(Mob mob) {
         return mob instanceof TamableAnimal tamable && tamable.isOrderedToSit();

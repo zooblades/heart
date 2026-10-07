@@ -1,5 +1,7 @@
 package com.heartbound.interaction;
 
+import com.heartbound.config.HeartboundConfig;
+import com.heartbound.config.ModConfig;
 import com.heartbound.item.GiftItem;
 import com.heartbound.item.RingItem;
 import com.heartbound.menu.RelationshipMenu;
@@ -38,11 +40,10 @@ import java.util.UUID;
  */
 public final class InteractionHandler {
 
-    public static final int GIFT_COOLDOWN_TICKS = 20;
-    public static final int PET_COOLDOWN_TICKS = 100;
-    public static final int PET_GAIN = 3;
-    public static final int MAX_FOLLOWERS = 3;
-    public static final int BREAKUP_AFFINITY = 300;
+
+    private static ModConfig cfg() {
+        return HeartboundConfig.get();
+    }
 
     private static final CooldownTracker GIFT_COOLDOWNS = new CooldownTracker();
     private static final CooldownTracker PET_COOLDOWNS = new CooldownTracker();
@@ -110,11 +111,11 @@ public final class InteractionHandler {
         if (!RomanceableMobs.isEligible(target)) {
             return false;
         }
-        if (!GIFT_COOLDOWNS.tryUse(player.getUUID(), target.getUUID(), level.getGameTime(), GIFT_COOLDOWN_TICKS)) {
+        if (!GIFT_COOLDOWNS.tryUse(player.getUUID(), target.getUUID(), level.getGameTime(), cfg().giftCooldownTicks)) {
             return false;
         }
         String mobId = BuiltInRegistries.ENTITY_TYPE.getKey(target.getType()).getPath();
-        int gain = GiftPreferences.gain(mobId, Gender.of(target.getUUID()), gift.kind());
+        int gain = GiftPreferences.gain(mobId, Gender.of(target.getUUID()), gift.kind(), cfg().giftGains);
         applyGain(level, player, target, gain, 6 + gain / 10);
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
@@ -127,10 +128,10 @@ public final class InteractionHandler {
         if (!RomanceableMobs.isEligible(target)) {
             return false;
         }
-        if (!PET_COOLDOWNS.tryUse(player.getUUID(), target.getUUID(), level.getGameTime(), PET_COOLDOWN_TICKS)) {
+        if (!PET_COOLDOWNS.tryUse(player.getUUID(), target.getUUID(), level.getGameTime(), cfg().petCooldownTicks)) {
             return false;
         }
-        applyGain(level, player, target, PET_GAIN, 3);
+        applyGain(level, player, target, cfg().petGain, 3);
         return true;
     }
 
@@ -201,7 +202,7 @@ public final class InteractionHandler {
         data.clearHome(mobId);
         data.stopFollowing(mobId);
         int current = data.get(mobId, player.getUUID());
-        data.set(mobId, player.getUUID(), Math.min(current, BREAKUP_AFFINITY));
+        data.set(mobId, player.getUUID(), Math.min(current, cfg().breakupAffinity));
         player.displayClientMessage(Component.translatable("message.heartbound.breakup"), false);
         return true;
     }
@@ -242,8 +243,8 @@ public final class InteractionHandler {
             player.displayClientMessage(Component.translatable("message.heartbound.follow_need_friends", target.getName()), true);
             return false;
         }
-        if (data.countFollowing(playerId) >= MAX_FOLLOWERS) {
-            player.displayClientMessage(Component.translatable("message.heartbound.follow_too_many", MAX_FOLLOWERS), true);
+        if (data.countFollowing(playerId) >= cfg().maxFollowers) {
+            player.displayClientMessage(Component.translatable("message.heartbound.follow_too_many", cfg().maxFollowers), true);
             return false;
         }
         data.setFollowing(mobId, playerId);

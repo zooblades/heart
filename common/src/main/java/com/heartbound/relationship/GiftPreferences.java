@@ -27,6 +27,22 @@ public final class GiftPreferences {
     }
 
     public static int gain(String mobId, Gender gender, GiftKind kind) {
+        return gain(mobId, gender, kind, Map.of());
+    }
+
+    /**
+     * Same as above, but entries in {@code overrides} (from the config) win. Override keys are
+     * "mob/gender" or "mob", override values map the gift name ("bouquet") to the gain.
+     */
+    public static int gain(String mobId, Gender gender, GiftKind kind, Map<String, Map<String, Integer>> overrides) {
+        String giftName = kind.name().toLowerCase(java.util.Locale.ROOT);
+        Integer fromConfig = override(overrides, mobId + "/" + gender.key(), giftName);
+        if (fromConfig == null) {
+            fromConfig = override(overrides, mobId, giftName);
+        }
+        if (fromConfig != null) {
+            return fromConfig;
+        }
         Integer specific = lookup(mobId + "/" + gender.key(), kind);
         if (specific != null) {
             return specific;
@@ -36,6 +52,14 @@ public final class GiftPreferences {
             return general;
         }
         return DEFAULT_GAINS.get(kind);
+    }
+
+    private static Integer override(Map<String, Map<String, Integer>> overrides, String key, String giftName) {
+        if (overrides == null) {
+            return null;
+        }
+        Map<String, Integer> gains = overrides.get(key);
+        return gains == null ? null : gains.get(giftName);
     }
 
     private static Integer lookup(String key, GiftKind kind) {

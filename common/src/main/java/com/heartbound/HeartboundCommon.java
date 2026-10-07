@@ -1,5 +1,6 @@
 package com.heartbound;
 
+import com.heartbound.config.HeartboundConfig;
 import com.heartbound.platform.Services;
 
 /**
@@ -12,6 +13,7 @@ public final class HeartboundCommon {
     }
 
     public static void init() {
+        HeartboundConfig.load(Services.PLATFORM.getConfigDir());
         Constants.LOG.info("{} common init on {} ({} environment)",
                 Constants.MOD_NAME,
                 Services.PLATFORM.getPlatformName(),
