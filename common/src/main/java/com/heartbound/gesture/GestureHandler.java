@@ -5,6 +5,9 @@ import com.heartbound.behavior.StageBehaviors;
 import com.heartbound.config.HeartboundConfig;
 import com.heartbound.network.RadialInfoPayload;
 import com.heartbound.relationship.CooldownTracker;
+import com.heartbound.relationship.EventType;
+import com.heartbound.relationship.MemoryRecorder;
+import com.heartbound.relationship.PairMemory;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RomanceableMobs;
 import net.minecraft.core.particles.ParticleOptions;
@@ -109,7 +112,15 @@ public final class GestureHandler {
         UUID playerId = player.getUUID();
         MOODS.recordSuccess(mobId, playerId);
         boolean comfort = MobMood.isUpset(entity) && gesture != Gesture.LIE_DOWN;
-        data.add(mobId, playerId, gesture.gain() * (comfort ? 2 : 1));
+        int before = data.get(mobId, playerId);
+        int after = data.add(mobId, playerId, gesture.gain() * (comfort ? 2 : 1));
+        MemoryRecorder.onAffinityChanged(player, entity, before, after);
+        MemoryRecorder.count(player, mobId, PairMemory.Counter.GESTURES);
+        if (gesture == Gesture.HUG) {
+            MemoryRecorder.record(player, mobId, entity.blockPosition().asLong(), EventType.FIRST_HUG, 0);
+        } else if (gesture == Gesture.KISS) {
+            MemoryRecorder.record(player, mobId, entity.blockPosition().asLong(), EventType.FIRST_KISS, 0);
+        }
 
         if (entity instanceof Mob mob) {
             mob.getLookControl().setLookAt(player, 30.0F, 30.0F);

@@ -26,6 +26,7 @@ public class RelationshipData extends SavedData {
     private final FollowTable following = new FollowTable();
     private final PartnerTable partners = new PartnerTable();
     private final KnowledgeTable knowledge = new KnowledgeTable();
+    private final MemoryBook memory = new MemoryBook();
     private final Map<UUID, Home> homes = new HashMap<>();
 
     public RelationshipData() {
@@ -68,6 +69,23 @@ public class RelationshipData extends SavedData {
             CompoundTag entry = known.getCompound(i);
             if (entry.hasUUID("mob") && entry.hasUUID("player")) {
                 data.knowledge.set(entry.getUUID("mob"), entry.getUUID("player"), entry.getInt("level"));
+            }
+        }
+        ListTag memoryList = tag.getList("memory", Tag.TAG_COMPOUND);
+        for (int i = 0; i < memoryList.size(); i++) {
+            CompoundTag entry = memoryList.getCompound(i);
+            if (!entry.hasUUID("mob") || !entry.hasUUID("player")) {
+                continue;
+            }
+            PairMemory pair = data.memory.getOrCreate(entry.getUUID("mob"), entry.getUUID("player"));
+            for (PairMemory.Counter counter : PairMemory.Counter.values()) {
+                pair.setCount(counter, entry.getInt("count_" + counter.name()));
+            }
+            ListTag events = entry.getList("events", Tag.TAG_COMPOUND);
+            for (int j = 0; j < events.size(); j++) {
+                CompoundTag event = events.getCompound(j);
+                pair.record(EventType.byName(event.getString("type")),
+                        event.getLong("day"), event.getLong("pos"), event.getInt("extra"));
             }
         }
         ListTag homeList = tag.getList("homes", Tag.TAG_COMPOUND);
@@ -120,6 +138,28 @@ public class RelationshipData extends SavedData {
         }
         tag.put("knowledge", known);
 
+        ListTag memoryList = new ListTag();
+        for (Map.Entry<AffinityTable.Key, PairMemory> e : memory.entries().entrySet()) {
+            CompoundTag entry = new CompoundTag();
+            entry.putUUID("mob", e.getKey().mob());
+            entry.putUUID("player", e.getKey().player());
+            for (PairMemory.Counter counter : PairMemory.Counter.values()) {
+                entry.putInt("count_" + counter.name(), e.getValue().count(counter));
+            }
+            ListTag events = new ListTag();
+            for (PairMemory.Entry recorded : e.getValue().entries()) {
+                CompoundTag event = new CompoundTag();
+                event.putString("type", recorded.type().name());
+                event.putLong("day", recorded.day());
+                event.putLong("pos", recorded.pos());
+                event.putInt("extra", recorded.extra());
+                events.add(event);
+            }
+            entry.put("events", events);
+            memoryList.add(entry);
+        }
+        tag.put("memory", memoryList);
+
         ListTag homeList = new ListTag();
         for (Map.Entry<UUID, Home> e : homes.entrySet()) {
             CompoundTag entry = new CompoundTag();
@@ -155,7 +195,28 @@ public class RelationshipData extends SavedData {
         following.clear(mob);
         partners.unpairMob(mob);
         knowledge.removeMob(mob);
+        memory.removeMob(mob);
         homes.remove(mob);
+        setDirty();
+    }
+
+    // ---- memory
+
+    /** What the mob remembers about the player, or null if nothing happened yet. */
+    public PairMemory getMemory(UUID mob, UUID player) {
+        return memory.get(mob, player);
+    }
+
+    public boolean recordEvent(UUID mob, UUID player, EventType type, long day, long pos, int extra) {
+        boolean added = memory.getOrCreate(mob, player).record(type, day, pos, extra);
+        if (added) {
+            setDirty();
+        }
+        return added;
+    }
+
+    public void incrementCounter(UUID mob, UUID player, PairMemory.Counter counter) {
+        memory.getOrCreate(mob, player).increment(counter);
         setDirty();
     }
 

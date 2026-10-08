@@ -2,9 +2,11 @@ package com.heartbound.menu;
 
 import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.config.HeartboundConfig;
+import com.heartbound.relationship.EventType;
 import com.heartbound.relationship.Gender;
 import com.heartbound.relationship.GiftKind;
 import com.heartbound.relationship.GiftPreferences;
+import com.heartbound.relationship.PairMemory;
 import com.heartbound.relationship.RelationshipData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
@@ -39,7 +41,10 @@ public class RelationshipMenu extends AbstractContainerMenu {
     private static final int DATA_PARTNER = 5;
     private static final int DATA_KNOWLEDGE = 6;
     private static final int DATA_FAVORITE = 7;
-    private static final int DATA_COUNT = 8;
+    private static final int DATA_COUNTERS = 8;
+    private static final int DATA_EVENTS = 12;
+    public static final int EVENT_SLOTS = 10;
+    private static final int DATA_COUNT = DATA_EVENTS + EVENT_SLOTS * 3;
 
     private final ContainerData data;
     /** Only set on the server. */
@@ -74,6 +79,9 @@ public class RelationshipMenu extends AbstractContainerMenu {
         return new ContainerData() {
             @Override
             public int get(int index) {
+                if (index >= DATA_COUNTERS) {
+                    return server == null ? 0 : memoryValue(server, mobId, playerId, index);
+                }
                 return switch (index) {
                     case DATA_AFFINITY -> server == null ? 0 : RelationshipData.get(server).get(mobId, playerId);
                     case DATA_GENDER -> gender;
@@ -96,6 +104,53 @@ public class RelationshipMenu extends AbstractContainerMenu {
                 return DATA_COUNT;
             }
         };
+    }
+
+    private static int memoryValue(MinecraftServer server, UUID mobId, UUID playerId, int index) {
+        PairMemory memory = RelationshipData.get(server).getMemory(mobId, playerId);
+        if (memory == null) {
+            return 0;
+        }
+        if (index < DATA_EVENTS) {
+            PairMemory.Counter[] counters = PairMemory.Counter.values();
+            int i = index - DATA_COUNTERS;
+            return i < counters.length ? memory.count(counters[i]) : 0;
+        }
+        int relative = index - DATA_EVENTS;
+        int slot = relative / 3;
+        int field = relative % 3;
+        java.util.List<PairMemory.Entry> entries = memory.entries();
+        if (slot >= entries.size()) {
+            return 0;
+        }
+        PairMemory.Entry entry = entries.get(slot);
+        return switch (field) {
+            case 0 -> entry.type().ordinal() + 1;
+            case 1 -> (int) Math.min(30000L, entry.day());
+            default -> entry.extra();
+        };
+    }
+
+    /** One line of the diary as the client sees it. */
+    public record DiaryLine(EventType type, int day, int extra) {
+    }
+
+    public int getCounter(PairMemory.Counter counter) {
+        return data.get(DATA_COUNTERS + counter.ordinal());
+    }
+
+    /** The remembered events in order (at most EVENT_SLOTS). */
+    public java.util.List<DiaryLine> getDiary() {
+        java.util.List<DiaryLine> lines = new java.util.ArrayList<>();
+        for (int slot = 0; slot < EVENT_SLOTS; slot++) {
+            int base = DATA_EVENTS + slot * 3;
+            EventType type = EventType.byOrdinal(data.get(base) - 1);
+            if (type == null) {
+                break;
+            }
+            lines.add(new DiaryLine(type, data.get(base + 1), data.get(base + 2)));
+        }
+        return lines;
     }
 
     public int getAffinity() {

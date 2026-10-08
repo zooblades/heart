@@ -245,5 +245,21 @@
   "dialogue.heartbound.about_you.species.fox.0": "Из лисьего рода: сладкие ягоды, снежные ночи и клад под листвой.",
   "dialogue.heartbound.about_you.species.fox.1": "Иногда таскаю добычу домой. Не ворую. Коллекционирую.",
   "dialogue.heartbound.about_you.species.piglin.0": "Из пиглинов. Золото блестит красивее всего. И нет, без золота я не торгую.",
-  "dialogue.heartbound.about_you.species.piglin.1": "В Нижнем мире тепло и шумно. Мне нравится. Но в Верхнем мире цветы лучше."
+  "dialogue.heartbound.about_you.species.piglin.1": "В Нижнем мире тепло и шумно. Мне нравится. Но в Верхнем мире цветы лучше.",
+  "button.heartbound.diary": "Дневник",
+  "diary.heartbound.title": "Дневник",
+  "diary.heartbound.line": "День %1$s: %2$s",
+  "diary.heartbound.empty": "Пока пусто. Проведите время вместе.",
+  "diary.heartbound.counters1": "Подарки: %1$s · Разговоры: %2$s",
+  "diary.heartbound.counters2": "Жесты: %1$s · Совместных утр: %2$s",
+  "event.heartbound.first_meeting": "Первая встреча",
+  "event.heartbound.first_gift": "Первый подарок: %1$s",
+  "event.heartbound.stage_acquainted": "Стали знакомыми",
+  "event.heartbound.stage_friends": "Стали друзьями",
+  "event.heartbound.stage_close": "Сблизились",
+  "event.heartbound.first_hug": "Первые объятия",
+  "event.heartbound.first_kiss": "Первый поцелуй",
+  "event.heartbound.proposal": "Стали парой",
+  "event.heartbound.first_morning": "Первое совместное утро",
+  "event.heartbound.breakup": "Расстались"
 }

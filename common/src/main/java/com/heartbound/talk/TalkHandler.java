@@ -3,6 +3,8 @@ package com.heartbound.talk;
 import com.heartbound.gesture.MobMood;
 import com.heartbound.gesture.Personality;
 import com.heartbound.relationship.CooldownTracker;
+import com.heartbound.relationship.MemoryRecorder;
+import com.heartbound.relationship.PairMemory;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RomanceableMobs;
 import net.minecraft.ChatFormatting;
@@ -65,6 +67,7 @@ public final class TalkHandler {
             return;
         }
         LIMITER.record(mobId, playerId, now);
+        MemoryRecorder.count(player, mobId, PairMemory.Counter.TALKS);
 
         boolean ok = true;
         int gain;
@@ -85,7 +88,8 @@ public final class TalkHandler {
             gain = Math.max(1, gain * factor / 100);
         }
         if (gain != 0) {
-            data.add(mobId, playerId, gain);
+            int after = data.add(mobId, playerId, gain);
+            MemoryRecorder.onAffinityChanged(player, entity, affinity, after);
         }
 
         if (ok && topic == Topic.ABOUT_YOU) {

@@ -78,6 +78,7 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
     private Button proposeButton;
     private Button homeButton;
     private boolean talkMode;
+    private boolean diaryMode;
     private final List<Button> talkButtons = new ArrayList<>();
 
     /** The bar value currently drawn; it glides towards the real affinity. */
@@ -102,6 +103,14 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
             initTalk(x, y);
             return;
         }
+        if (diaryMode) {
+            addRenderableWidget(new RoundedButton(x + 10, y + 142, 60, 20,
+                    Component.translatable("button.heartbound.talk_back"), button -> {
+                        diaryMode = false;
+                        rebuildWidgets();
+                    }));
+            return;
+        }
         addRenderableWidget(new RoundedButton(x + 10, y + 116, 76, 20,
                 Component.translatable("button.heartbound.gift"), button -> press(RelationshipMenu.BUTTON_GIFT)));
         followButton = new RoundedButton(x + 91, y + 116, 76, 20,
@@ -116,6 +125,11 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         addRenderableWidget(new RoundedButton(x + 91, y + 142, 76, 20,
                 Component.translatable("button.heartbound.talk"), button -> {
                     talkMode = true;
+                    rebuildWidgets();
+                }));
+        addRenderableWidget(new RoundedButton(x + 172, y + 142, 76, 20,
+                Component.translatable("button.heartbound.diary"), button -> {
+                    diaryMode = true;
                     rebuildWidgets();
                 }));
     }
@@ -166,6 +180,35 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
             talkButtons.get(i).active = affinity >= topics[i].minAffinity();
         }
         super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    private void renderDiary(GuiGraphics g) {
+        g.drawString(font, Component.translatable("diary.heartbound.title"), 80, 76, TEXT_PARTNER, false);
+        java.util.List<RelationshipMenu.DiaryLine> lines = menu.getDiary();
+        int from = Math.max(0, lines.size() - 6);
+        int y = 87;
+        for (int i = from; i < lines.size(); i++) {
+            RelationshipMenu.DiaryLine line = lines.get(i);
+            Component text;
+            if (line.type() == com.heartbound.relationship.EventType.FIRST_GIFT) {
+                GiftKind kind = line.extra() == GiftKind.HEART_CHARM.ordinal() ? GiftKind.HEART_CHARM : GiftKind.BOUQUET;
+                text = Component.translatable("event.heartbound.first_gift", Component.translatable(
+                        kind == GiftKind.BOUQUET ? "item.heartbound.bouquet" : "item.heartbound.heart_charm"));
+            } else {
+                text = Component.translatable("event.heartbound." + line.type().key());
+            }
+            g.drawString(font, Component.translatable("diary.heartbound.line", line.day() + 1, text), 80, y, TEXT_MAIN, false);
+            y += 9;
+        }
+        if (lines.isEmpty()) {
+            g.drawString(font, Component.translatable("diary.heartbound.empty"), 80, 87, TEXT_HINT, false);
+        }
+        g.drawString(font, Component.translatable("diary.heartbound.counters1",
+                menu.getCounter(com.heartbound.relationship.PairMemory.Counter.GIFTS),
+                menu.getCounter(com.heartbound.relationship.PairMemory.Counter.TALKS)), 80, 143, TEXT_HINT, false);
+        g.drawString(font, Component.translatable("diary.heartbound.counters2",
+                menu.getCounter(com.heartbound.relationship.PairMemory.Counter.GESTURES),
+                menu.getCounter(com.heartbound.relationship.PairMemory.Counter.MORNINGS)), 80, 153, TEXT_HINT, false);
     }
 
     private void press(int buttonId) {
@@ -261,8 +304,12 @@ public class RelationshipScreen extends AbstractContainerScreen<RelationshipMenu
         if (knowledge >= 2 && gift != null) {
             favorite = Component.translatable(gift == GiftKind.BOUQUET ? "item.heartbound.bouquet" : "item.heartbound.heart_charm");
         }
-        g.drawString(font, Component.translatable("label.heartbound.character", character), 80, 76, TEXT_MAIN, false);
-        g.drawString(font, Component.translatable("label.heartbound.favorite_gift", favorite), 80, 88, TEXT_MAIN, false);
+        if (diaryMode) {
+            renderDiary(g);
+        } else {
+            g.drawString(font, Component.translatable("label.heartbound.character", character), 80, 76, TEXT_MAIN, false);
+            g.drawString(font, Component.translatable("label.heartbound.favorite_gift", favorite), 80, 88, TEXT_MAIN, false);
+        }
 
         g.drawString(font, Component.translatable("hint.heartbound.pet"), 10, 168, TEXT_HINT, false);
     }

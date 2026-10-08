@@ -245,5 +245,21 @@
   "dialogue.heartbound.about_you.species.fox.0": "I'm a fox. Sweet berries, snowy nights and treasure under the leaves.",
   "dialogue.heartbound.about_you.species.fox.1": "I drag stuff home sometimes. Not stealing. Collecting.",
   "dialogue.heartbound.about_you.species.piglin.0": "I'm a piglin. Gold shines nicer than anything. And no, I don't trade without gold.",
-  "dialogue.heartbound.about_you.species.piglin.1": "The Nether is warm and loud. I like it. But the Overworld has better flowers."
+  "dialogue.heartbound.about_you.species.piglin.1": "The Nether is warm and loud. I like it. But the Overworld has better flowers.",
+  "button.heartbound.diary": "Diary",
+  "diary.heartbound.title": "Diary",
+  "diary.heartbound.line": "Day %1$s: %2$s",
+  "diary.heartbound.empty": "Nothing yet. Spend some time together.",
+  "diary.heartbound.counters1": "Gifts: %1$s · Talks: %2$s",
+  "diary.heartbound.counters2": "Gestures: %1$s · Mornings together: %2$s",
+  "event.heartbound.first_meeting": "First meeting",
+  "event.heartbound.first_gift": "First gift: %1$s",
+  "event.heartbound.stage_acquainted": "Became acquaintances",
+  "event.heartbound.stage_friends": "Became friends",
+  "event.heartbound.stage_close": "Grew close",
+  "event.heartbound.first_hug": "First hug",
+  "event.heartbound.first_kiss": "First kiss",
+  "event.heartbound.proposal": "Became partners",
+  "event.heartbound.first_morning": "First morning together",
+  "event.heartbound.breakup": "Parted ways"
 }

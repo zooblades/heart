@@ -2,7 +2,10 @@ package com.heartbound.behavior;
 
 import com.heartbound.config.HeartboundConfig;
 import com.heartbound.life.LifeDirector;
+import com.heartbound.relationship.EventType;
 import com.heartbound.relationship.Home;
+import com.heartbound.relationship.MemoryRecorder;
+import com.heartbound.relationship.PairMemory;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RelationshipStage;
 import com.heartbound.relationship.RomanceableMobs;
@@ -222,6 +225,8 @@ public final class StageBehaviors {
         ServerLevel level = player.serverLevel();
         player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, HeartboundConfig.get().morningBonusSeconds * 20, 1));
         player.giveExperiencePoints(HeartboundConfig.get().morningBonusXp);
+        MemoryRecorder.record(player, mobId, player.blockPosition().asLong(), EventType.FIRST_MORNING, 0);
+        MemoryRecorder.count(player, mobId, PairMemory.Counter.MORNINGS);
         Entity partner = level.getEntity(mobId);
         if (partner != null) {
             level.sendParticles(ParticleTypes.HEART,

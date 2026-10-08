@@ -7,7 +7,10 @@ import com.heartbound.item.RingItem;
 import com.heartbound.menu.RelationshipMenu;
 import com.heartbound.relationship.CooldownTracker;
 import com.heartbound.relationship.Gender;
+import com.heartbound.relationship.EventType;
 import com.heartbound.relationship.GiftPreferences;
+import com.heartbound.relationship.MemoryRecorder;
+import com.heartbound.relationship.PairMemory;
 import com.heartbound.relationship.Home;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RelationshipStage;
@@ -117,6 +120,9 @@ public final class InteractionHandler {
         String mobId = BuiltInRegistries.ENTITY_TYPE.getKey(target.getType()).getPath();
         int gain = GiftPreferences.gain(mobId, Gender.of(target.getUUID()), gift.kind(), cfg().giftGains);
         applyGain(level, player, target, gain, 6 + gain / 10);
+        MemoryRecorder.record(player, target.getUUID(), target.blockPosition().asLong(),
+                EventType.FIRST_GIFT, gift.kind().ordinal());
+        MemoryRecorder.count(player, target.getUUID(), PairMemory.Counter.GIFTS);
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
@@ -184,6 +190,7 @@ public final class InteractionHandler {
                 target.getX(), target.getY() + target.getBbHeight() + 0.2, target.getZ(), 25, 0.5, 0.4, 0.5, 0.05);
         level.playSound(null, target.getX(), target.getY(), target.getZ(),
                 SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 1.0F, 1.2F);
+        MemoryRecorder.record(player, mobId, target.blockPosition().asLong(), EventType.PROPOSAL, 0);
         player.displayClientMessage(Component.translatable("message.heartbound.propose_accepted", target.getName()), false);
         return true;
     }
@@ -201,6 +208,7 @@ public final class InteractionHandler {
         }
         data.clearHome(mobId);
         data.stopFollowing(mobId);
+        MemoryRecorder.record(player, mobId, player.blockPosition().asLong(), EventType.BREAKUP, 0);
         int current = data.get(mobId, player.getUUID());
         data.set(mobId, player.getUUID(), Math.min(current, cfg().breakupAffinity));
         player.displayClientMessage(Component.translatable("message.heartbound.breakup"), false);
@@ -256,6 +264,7 @@ public final class InteractionHandler {
         RelationshipData data = RelationshipData.get(level.getServer());
         int before = data.get(target.getUUID(), player.getUUID());
         int after = data.add(target.getUUID(), player.getUUID(), gain);
+        MemoryRecorder.onAffinityChanged(player, target, before, after);
         RelationshipStage stageBefore = RelationshipStage.forAffinity(before);
         RelationshipStage stageAfter = RelationshipStage.forAffinity(after);
         boolean stageUp = stageAfter.ordinal() > stageBefore.ordinal();
