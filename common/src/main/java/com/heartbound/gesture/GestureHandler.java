@@ -11,6 +11,8 @@ import com.heartbound.relationship.MemoryRecorder;
 import com.heartbound.relationship.PairMemory;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RomanceableMobs;
+import com.heartbound.talk.PartnerTalk;
+import com.heartbound.talk.PartnerTalkRules;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -138,6 +140,11 @@ public final class GestureHandler {
         int after = data.add(mobId, playerId, gesture.gain() * (comfort ? 2 : 1));
         MemoryRecorder.onAffinityChanged(player, entity, before, after);
         MemoryRecorder.count(player, mobId, PairMemory.Counter.GESTURES);
+        if (gesture == Gesture.LIE_DOWN) {
+            PartnerTalk.note(mobId, PartnerTalkRules.Prompt.TOGETHER, now);
+        } else if (gesture != Gesture.HOLD_HANDS) {
+            PartnerTalk.note(mobId, PartnerTalkRules.Prompt.CLOSE, now);
+        }
         if (gesture == Gesture.HUG) {
             MemoryRecorder.record(player, mobId, entity.blockPosition().asLong(), EventType.FIRST_HUG, 0);
         } else if (gesture == Gesture.KISS) {
@@ -179,6 +186,7 @@ public final class GestureHandler {
         UUID mobId = entity.getUUID();
         UUID playerId = player.getUUID();
         MOODS.recordRefusal(mobId, playerId, now);
+        PartnerTalk.note(mobId, PartnerTalkRules.Prompt.QUARREL, now);
         data.add(mobId, playerId, -HeartboundConfig.get().gesturePenalty);
         burst(level, entity, ParticleTypes.SMOKE, 5);
         player.displayClientMessage(

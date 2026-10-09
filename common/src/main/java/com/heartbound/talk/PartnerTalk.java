@@ -5,6 +5,7 @@ import com.heartbound.behavior.RestManager;
 import com.heartbound.config.HeartboundConfig;
 import com.heartbound.gesture.MobMood;
 import com.heartbound.gesture.Personality;
+import com.heartbound.relationship.Home;
 import com.heartbound.relationship.MemoryRecorder;
 import com.heartbound.relationship.PairMemory;
 import com.heartbound.relationship.RelationshipData;
@@ -13,6 +14,7 @@ import com.heartbound.talk.PartnerTalkRules.Period;
 import com.heartbound.talk.PartnerTalkRules.Prompt;
 import com.heartbound.talk.PartnerTalkRules.Tone;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -24,6 +26,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,8 +46,15 @@ public final class PartnerTalk {
     private static final double TALK_DISTANCE_SQR = 10.0D * 10.0D;
     private static final double REPLY_DISTANCE_SQR = 16.0D * 16.0D;
 
-    private record Pending(int token, UUID mob, long expires) {
+    private record Pending(int token, UUID mob, long expires, int depth) {
     }
+
+    /** A recent event the partner may bring up (a gift, a hug, a quarrel). */
+    private record Recent(Prompt prompt, long until) {
+    }
+
+    private static final long RECENT_TICKS = 12000L;
+    private static final Map<UUID, Recent> RECENT = new HashMap<>();
 
     /** Open questions by player. */
     private static final Map<UUID, Pending> PENDING = new HashMap<>();
@@ -54,6 +65,11 @@ public final class PartnerTalk {
     private static int nextToken = 1;
 
     private PartnerTalk() {
+    }
+
+    /** Remembers an event the partner may bring up in its next conversation (GIFT, CLOSE, TOGETHER, QUARREL). */
+    public static void note(UUID mob, Prompt event, long now) {
+        RECENT.put(mob, new Recent(event, now + RECENT_TICKS));
     }
 
     /** Called about once a second. */
@@ -103,8 +119,45 @@ public final class PartnerTalk {
 
     private static void start(ServerLevel level, ServerPlayer player, Mob mob, long now, int seconds) {
         UUID mobId = mob.getUUID();
-        Prompt prompt = PartnerTalkRules.choose(Period.of(level.getDayTime()), MobMood.isUpset(mob),
-                player.getHealth() <= 8.0F, LAST_PROMPT.get(mobId), level.random.nextInt(100));
+        Recent recent = RECENT.get(mobId);
+        Prompt event = null;
+        if (recent != null) {
+            event = now <= recent.until() ? recent.prompt() : null;
+            if (event == null) {
+                RECENT.remove(mobId);
+            }
+        }
+        Prompt last = LAST_PROMPT.get(mobId);
+        PartnerTalkRules.Context context = new PartnerTalkRules.Context(Period.of(level.getDayTime()),
+                MobMood.isUpset(mob), player.getHealth() <= 8.0F, event, situation(level, mob));
+        Prompt prompt = PartnerTalkRules.choose(context, last, level.random.nextInt(100));
+        if (prompt == event) {
+            RECENT.remove(mobId);
+        }
+        NEXT.put(mobId, now + seconds * 20L + level.random.nextInt(Math.max(1, seconds * 10)));
+        ask(level, player, mob, prompt, 0, now);
+    }
+
+    /** What the surroundings suggest talking about, or null. */
+    private static Prompt situation(ServerLevel level, Mob mob) {
+        if (level.dimension() == Level.NETHER) {
+            return Prompt.NETHER;
+        }
+        boolean sky = level.canSeeSky(mob.blockPosition());
+        if (level.isRaining() && sky) {
+            return Prompt.RAIN;
+        }
+        Home home = level.getServer() == null ? null : RelationshipData.get(level.getServer()).getHome(mob.getUUID());
+        if (home != null && home.dimension().equals(level.dimension().location().toString())
+                && mob.distanceToSqr(Vec3.atCenterOf(BlockPos.of(home.pos()))) <= 64.0D) {
+            return Prompt.HOME;
+        }
+        return !sky && mob.getY() < 50.0D ? Prompt.CAVE : null;
+    }
+
+    /** Says the line and offers the three answers. depth 0 is a new conversation, 1 a continuation. */
+    private static void ask(ServerLevel level, ServerPlayer player, Mob mob, Prompt prompt, int depth, long now) {
+        UUID mobId = mob.getUUID();
         int variant = level.random.nextInt(PartnerTalkRules.OPEN_VARIANTS);
         if (prompt == LAST_PROMPT.get(mobId) && Integer.valueOf(variant).equals(LAST_VARIANT.get(mobId))) {
             variant = (variant + 1) % PartnerTalkRules.OPEN_VARIANTS;
@@ -113,8 +166,7 @@ public final class PartnerTalk {
         LAST_VARIANT.put(mobId, variant);
 
         int token = nextToken++;
-        PENDING.put(player.getUUID(), new Pending(token, mobId, now + ANSWER_TIME_TICKS));
-        NEXT.put(mobId, now + seconds * 20L + level.random.nextInt(Math.max(1, seconds * 10)));
+        PENDING.put(player.getUUID(), new Pending(token, mobId, now + ANSWER_TIME_TICKS, depth));
         FreezeManager.freezeUntil(mobId, now + 200L);
 
         TalkHandler.say(player, mob, PartnerTalkRules.openKey(prompt, variant));
@@ -170,5 +222,17 @@ public final class PartnerTalk {
         }
         TalkHandler.say(player, mob, PartnerTalkRules.reactKey(outcome, personality,
                 level.random.nextInt(PartnerTalkRules.REACT_VARIANTS)));
+        if (outcome == Outcome.BAD) {
+            note(mobId, Prompt.QUARREL, now);
+        }
+        if (pending.depth() == 0) {
+            Prompt follow = PartnerTalkRules.followUp(outcome, level.random.nextInt(100));
+            if (follow != null) {
+                if (follow == Prompt.FOLLOW_BAD) {
+                    RECENT.remove(mobId);
+                }
+                ask(level, player, mob, follow, 1, now);
+            }
+        }
     }
 }

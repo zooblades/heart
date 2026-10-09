@@ -76,6 +76,44 @@ class PartnerTalkRulesTest {
         assertTrue(PartnerTalkRules.gain(Tone.COLD, Outcome.BAD) < 0);
     }
 
+    private static PartnerTalkRules.Context ctx(boolean upset, boolean hurt, Prompt event, Prompt situation) {
+        return new PartnerTalkRules.Context(Period.DAY, upset, hurt, event, situation);
+    }
+
+    @Test
+    void recentEventComesBeforeSituationAndTimeOfDay() {
+        assertEquals(Prompt.GIFT, PartnerTalkRules.choose(ctx(false, false, Prompt.GIFT, Prompt.RAIN), null, 10));
+        assertEquals(Prompt.COMFORT, PartnerTalkRules.choose(ctx(true, false, Prompt.GIFT, null), null, 10));
+        assertEquals(Prompt.WORRY, PartnerTalkRules.choose(ctx(false, true, Prompt.GIFT, null), null, 10));
+        assertNotEquals(Prompt.GIFT, PartnerTalkRules.choose(ctx(false, false, Prompt.GIFT, null), Prompt.GIFT, 10));
+    }
+
+    @Test
+    void situationIsUsedAboutHalfTheTime() {
+        assertEquals(Prompt.CAVE, PartnerTalkRules.choose(ctx(false, false, null, Prompt.CAVE), null, 10));
+        assertNotEquals(Prompt.CAVE, PartnerTalkRules.choose(ctx(false, false, null, Prompt.CAVE), null, 80));
+        assertNotEquals(Prompt.CAVE, PartnerTalkRules.choose(ctx(false, false, null, Prompt.CAVE), Prompt.CAVE, 10));
+    }
+
+    @Test
+    void continuationsDependOnTheOutcome() {
+        assertEquals(Prompt.FOLLOW_GOOD, PartnerTalkRules.followUp(Outcome.GOOD, 10));
+        assertNull(PartnerTalkRules.followUp(Outcome.GOOD, 90));
+        assertEquals(Prompt.FOLLOW_BAD, PartnerTalkRules.followUp(Outcome.BAD, 10));
+        assertNull(PartnerTalkRules.followUp(Outcome.NEUTRAL, 0));
+    }
+
+    @Test
+    void continuationsAreNeverChosenOnTheirOwn() {
+        for (Period period : Period.values()) {
+            for (int roll = 0; roll < 100; roll += 5) {
+                Prompt pick = PartnerTalkRules.choose(period, false, false, null, roll);
+                assertNotEquals(Prompt.FOLLOW_GOOD, pick);
+                assertNotEquals(Prompt.FOLLOW_BAD, pick);
+            }
+        }
+    }
+
     @Test
     void toneLookup() {
         assertEquals(Tone.COLD, Tone.byId(2));

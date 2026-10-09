@@ -51,7 +51,20 @@ public final class PartnerTalkRules {
         /** The partner itself is hurt. */
         COMFORT,
         /** Nothing special, just warm words. */
-        GLAD;
+        GLAD,
+        /** Continuations after a good or a bad answer (never chosen on their own). */
+        FOLLOW_GOOD,
+        FOLLOW_BAD,
+        /** After events: a gift, a hug or kiss, a night together, a quarrel. */
+        GIFT,
+        CLOSE,
+        TOGETHER,
+        QUARREL,
+        /** Situations: at home, in the Nether, in a cave, in the rain. */
+        HOME,
+        NETHER,
+        CAVE,
+        RAIN;
 
         public String key() {
             return name().toLowerCase(Locale.ROOT);
@@ -91,6 +104,42 @@ public final class PartnerTalkRules {
         public String key() {
             return name().toLowerCase(Locale.ROOT);
         }
+    }
+
+    /** What is going on around the partner when it decides to talk. Event and situation may be null. */
+    public record Context(Period period, boolean partnerUpset, boolean playerHurt, Prompt event, Prompt situation) {
+    }
+
+    /**
+     * Picks what to talk about: a hurt partner, a hurt player, a recent event (a gift, a hug, a quarrel),
+     * sometimes the situation (home, Nether, cave, rain), otherwise the time of day or warm words.
+     * Never the same subject twice in a row.
+     *
+     * @param roll a random number from 0 to 99
+     */
+    public static Prompt choose(Context context, Prompt last, int roll) {
+        if (context.partnerUpset()) {
+            return Prompt.COMFORT;
+        }
+        if (context.playerHurt() && last != Prompt.WORRY) {
+            return Prompt.WORRY;
+        }
+        if (context.event() != null && context.event() != last) {
+            return context.event();
+        }
+        if (context.situation() != null && context.situation() != last && roll % 100 < 50) {
+            return context.situation();
+        }
+        return choose(context.period(), false, false, last, roll);
+    }
+
+    /** Whether the partner goes on talking after the reaction; null if not. Only one level deep. */
+    public static Prompt followUp(Outcome outcome, int roll) {
+        return switch (outcome) {
+            case GOOD -> roll < 40 ? Prompt.FOLLOW_GOOD : null;
+            case BAD -> roll < 50 ? Prompt.FOLLOW_BAD : null;
+            case NEUTRAL -> null;
+        };
     }
 
     /**

@@ -10,6 +10,8 @@ import com.heartbound.relationship.Gender;
 import com.heartbound.relationship.EventType;
 import com.heartbound.relationship.GiftPreferences;
 import com.heartbound.relationship.MemoryRecorder;
+import com.heartbound.talk.PartnerTalk;
+import com.heartbound.talk.PartnerTalkRules;
 import com.heartbound.relationship.PairMemory;
 import com.heartbound.relationship.Home;
 import com.heartbound.relationship.RelationshipData;
@@ -123,6 +125,7 @@ public final class InteractionHandler {
         MemoryRecorder.record(player, target.getUUID(), target.blockPosition().asLong(),
                 EventType.FIRST_GIFT, gift.kind().ordinal());
         MemoryRecorder.count(player, target.getUUID(), PairMemory.Counter.GIFTS);
+        PartnerTalk.note(target.getUUID(), PartnerTalkRules.Prompt.GIFT, level.getGameTime());
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }

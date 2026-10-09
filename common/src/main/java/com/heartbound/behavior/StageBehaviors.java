@@ -230,6 +230,7 @@ public final class StageBehaviors {
         player.giveExperiencePoints(HeartboundConfig.get().morningBonusXp);
         MemoryRecorder.record(player, mobId, player.blockPosition().asLong(), EventType.FIRST_MORNING, 0);
         MemoryRecorder.count(player, mobId, PairMemory.Counter.MORNINGS);
+        PartnerTalk.note(mobId, com.heartbound.talk.PartnerTalkRules.Prompt.TOGETHER, level.getGameTime());
         Entity partner = level.getEntity(mobId);
         if (partner != null) {
             level.sendParticles(ParticleTypes.HEART,
