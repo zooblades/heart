@@ -52,6 +52,11 @@
   "gesture.heartbound.success.hug": "%1$s hugs you warmly",
   "gesture.heartbound.success.cheek_kiss": "%1$s blushes and smiles",
   "gesture.heartbound.success.kiss": "%1$s smiles and kisses you",
+  "gesture.heartbound.success.lie_down": "%1$s lies down next to you",
+  "gesture.heartbound.got_up": "%1$s gets up",
+  "gesture.heartbound.lie_down.busy": "%1$s cannot lie down right now",
+  "gesture.heartbound.lie_down.no_bed": "%1$s cannot find a place to lie down: a free bed is needed nearby",
+  "gesture.heartbound.lie_down.too_early": "%1$s only wants to lie down in the evening, when it gets dark",
   "gesture.heartbound.refused.shy": "%1$s blushes and steps back",
   "gesture.heartbound.refused.neutral": "%1$s is not in the mood",
   "gesture.heartbound.refused.bold": "%1$s shakes their head",
@@ -261,5 +266,6 @@
   "event.heartbound.first_kiss": "First kiss",
   "event.heartbound.proposal": "Became partners",
   "event.heartbound.first_morning": "First morning together",
-  "event.heartbound.breakup": "Parted ways"
+  "event.heartbound.breakup": "Parted ways",
+  "event.heartbound.first_lie_down": "First time lying down together"
 }

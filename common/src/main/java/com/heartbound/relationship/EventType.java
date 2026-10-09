@@ -13,7 +13,8 @@ public enum EventType {
     FIRST_KISS,
     PROPOSAL,
     FIRST_MORNING,
-    BREAKUP;
+    BREAKUP,
+    FIRST_LIE_DOWN;
 
     public String key() {
         return name().toLowerCase(Locale.ROOT);

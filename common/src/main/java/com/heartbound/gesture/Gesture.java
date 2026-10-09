@@ -11,7 +11,7 @@ public enum Gesture {
     HUG(600, false, 2, 75, 8, true),
     CHEEK_KISS(600, false, 2, 65, 10, true),
     KISS(0, true, 3, 70, 15, true),
-    LIE_DOWN(0, true, 4, 60, 0, false);
+    LIE_DOWN(0, true, 4, 60, 10, true);
 
     private final int minAffinity;
     private final boolean partnerOnly;

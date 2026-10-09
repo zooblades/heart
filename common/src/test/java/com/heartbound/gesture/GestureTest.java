@@ -20,8 +20,9 @@ class GestureTest {
     }
 
     @Test
-    void lieDownIsNotImplementedYet() {
-        assertFalse(Gesture.LIE_DOWN.implemented());
+    void lieDownIsImplementedAndPartnerOnly() {
+        assertTrue(Gesture.LIE_DOWN.implemented());
+        assertTrue(Gesture.LIE_DOWN.partnerOnly());
         assertTrue(Gesture.KISS.implemented());
     }
 

@@ -1,6 +1,7 @@
 package com.heartbound.gesture;
 
 import com.heartbound.behavior.FreezeManager;
+import com.heartbound.behavior.RestManager;
 import com.heartbound.behavior.StageBehaviors;
 import com.heartbound.config.HeartboundConfig;
 import com.heartbound.network.RadialInfoPayload;
@@ -24,6 +25,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -81,6 +83,10 @@ public final class GestureHandler {
             player.displayClientMessage(Component.translatable("gesture.heartbound.released", entity.getName()), true);
             return;
         }
+        if (gesture == Gesture.LIE_DOWN && RestManager.getUp(entity)) {
+            player.displayClientMessage(Component.translatable("gesture.heartbound.got_up", entity.getName()), true);
+            return;
+        }
         int affinity = data.get(mobId, playerId);
         boolean partner = data.isPartner(mobId, playerId);
 
@@ -92,6 +98,14 @@ public final class GestureHandler {
         if (MOODS.isOffended(mobId, playerId, now)) {
             player.displayClientMessage(Component.translatable("gesture.heartbound.offended", entity.getName()), true);
             return;
+        }
+        if (gesture == Gesture.LIE_DOWN) {
+            RestManager.Check check = RestManager.check(entity);
+            if (check != RestManager.Check.OK) {
+                player.displayClientMessage(Component.translatable(
+                        "gesture.heartbound.lie_down." + check.name().toLowerCase(Locale.ROOT), entity.getName()), true);
+                return;
+            }
         }
         if (!COOLDOWNS.tryUse(playerId, mobId, now, HeartboundConfig.get().gestureCooldownTicks)) {
             return;
@@ -110,6 +124,11 @@ public final class GestureHandler {
                                 RelationshipData data, Gesture gesture, long now) {
         UUID mobId = entity.getUUID();
         UUID playerId = player.getUUID();
+        if (gesture == Gesture.LIE_DOWN
+                && !(entity instanceof Mob rester && RestManager.start(level, player, rester))) {
+            player.displayClientMessage(Component.translatable("gesture.heartbound.lie_down.no_bed", entity.getName()), true);
+            return;
+        }
         MOODS.recordSuccess(mobId, playerId);
         boolean comfort = MobMood.isUpset(entity) && gesture != Gesture.LIE_DOWN;
         int before = data.get(mobId, playerId);
@@ -120,6 +139,8 @@ public final class GestureHandler {
             MemoryRecorder.record(player, mobId, entity.blockPosition().asLong(), EventType.FIRST_HUG, 0);
         } else if (gesture == Gesture.KISS) {
             MemoryRecorder.record(player, mobId, entity.blockPosition().asLong(), EventType.FIRST_KISS, 0);
+        } else if (gesture == Gesture.LIE_DOWN) {
+            MemoryRecorder.record(player, mobId, entity.blockPosition().asLong(), EventType.FIRST_LIE_DOWN, 0);
         }
 
         if (entity instanceof Mob mob) {
@@ -133,6 +154,7 @@ public final class GestureHandler {
             case HUG -> 10;
             case CHEEK_KISS -> 8;
             case KISS -> 16;
+            case LIE_DOWN -> 6;
             default -> 3;
         };
         burst(level, entity, ParticleTypes.HEART, hearts);
