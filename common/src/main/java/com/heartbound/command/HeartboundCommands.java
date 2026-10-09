@@ -4,6 +4,7 @@ import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RelationshipStage;
 import com.heartbound.relationship.RomanceableMobs;
+import com.heartbound.talk.PartnerTalk;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -35,6 +36,10 @@ public final class HeartboundCommands {
         int max = RelationshipStage.MAX_AFFINITY;
         dispatcher.register(Commands.literal("heartbound")
                 .then(Commands.literal("breakup").executes(HeartboundCommands::breakUp))
+                .then(Commands.literal("reply")
+                        .then(Commands.argument("token", IntegerArgumentType.integer())
+                                .then(Commands.argument("option", IntegerArgumentType.integer(0, 2))
+                                        .executes(HeartboundCommands::reply))))
                 .then(Commands.literal("affinity").requires(source -> source.hasPermission(2))
                         .then(Commands.literal("get")
                                 .then(Commands.argument("mob", EntityArgument.entity())
@@ -52,6 +57,12 @@ public final class HeartboundCommands {
     private static int breakUp(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         return InteractionHandler.breakUp(player) ? 1 : 0;
+    }
+
+    private static int reply(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        PartnerTalk.reply(player, IntegerArgumentType.getInteger(ctx, "token"), IntegerArgumentType.getInteger(ctx, "option"));
+        return 1;
     }
 
     private static Entity resolveMob(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

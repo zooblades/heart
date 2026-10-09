@@ -106,7 +106,7 @@ public final class TalkHandler {
         say(player, entity, key);
     }
 
-    private static void say(ServerPlayer player, Entity entity, String key) {
+    static void say(ServerPlayer player, Entity entity, String key) {
         player.sendSystemMessage(Component.translatable("dialogue.heartbound.format",
                 entity.getName().copy().withStyle(ChatFormatting.YELLOW), Component.translatable(key)));
     }

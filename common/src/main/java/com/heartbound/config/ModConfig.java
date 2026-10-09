@@ -24,6 +24,8 @@ public final class ModConfig {
     public int morningBonusXp = 15;
     public int gestureCooldownTicks = 200;
     public int holdHandsSeconds = 30;
+    /** Average pause between conversations the partner starts by itself, in seconds (0 turns them off). */
+    public int partnerTalkSeconds = 300;
     /** Life intensity: 0 off, 1 rare, 2 normal, 3 lively. */
     public int lifeIntensity = 2;
     public int gesturePenalty = 3;
@@ -46,6 +48,7 @@ public final class ModConfig {
         gestureCooldownTicks = clamp(gestureCooldownTicks, 0, 6000);
         gesturePenalty = clamp(gesturePenalty, 0, 1000);
         holdHandsSeconds = clamp(holdHandsSeconds, 5, 600);
+        partnerTalkSeconds = clamp(partnerTalkSeconds, 0, 3600);
         lifeIntensity = clamp(lifeIntensity, 0, 3);
 
         if (giftGains == null) {

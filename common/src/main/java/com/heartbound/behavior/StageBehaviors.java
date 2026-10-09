@@ -9,6 +9,7 @@ import com.heartbound.relationship.PairMemory;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RelationshipStage;
 import com.heartbound.relationship.RomanceableMobs;
+import com.heartbound.talk.PartnerTalk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -88,6 +89,7 @@ public final class StageBehaviors {
         partnerTick(server, data);
         if (server.getTickCount() % 20 == 0) {
             LifeDirector.tick(server, data);
+            PartnerTalk.tick(server, data);
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             nearbyTick(player, data);
