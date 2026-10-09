@@ -100,7 +100,7 @@ public final class GestureHandler {
             return;
         }
         if (gesture == Gesture.LIE_DOWN) {
-            RestManager.Check check = RestManager.check(entity);
+            RestManager.Check check = RestManager.check(player, entity);
             if (check != RestManager.Check.OK) {
                 player.displayClientMessage(Component.translatable(
                         "gesture.heartbound.lie_down." + check.name().toLowerCase(Locale.ROOT), entity.getName()), true);
@@ -124,10 +124,13 @@ public final class GestureHandler {
                                 RelationshipData data, Gesture gesture, long now) {
         UUID mobId = entity.getUUID();
         UUID playerId = player.getUUID();
-        if (gesture == Gesture.LIE_DOWN
-                && !(entity instanceof Mob rester && RestManager.start(level, player, rester))) {
-            player.displayClientMessage(Component.translatable("gesture.heartbound.lie_down.no_bed", entity.getName()), true);
-            return;
+        if (gesture == Gesture.LIE_DOWN) {
+            Component problem = entity instanceof Mob rester ? RestManager.start(level, player, rester)
+                    : Component.translatable("gesture.heartbound.lie_down.busy", entity.getName());
+            if (problem != null) {
+                player.displayClientMessage(problem, true);
+                return;
+            }
         }
         MOODS.recordSuccess(mobId, playerId);
         boolean comfort = MobMood.isUpset(entity) && gesture != Gesture.LIE_DOWN;

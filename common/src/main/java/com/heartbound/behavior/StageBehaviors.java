@@ -1,7 +1,6 @@
 package com.heartbound.behavior;
 
 import com.heartbound.config.HeartboundConfig;
-import com.heartbound.gesture.RestRules;
 import com.heartbound.life.LifeDirector;
 import com.heartbound.relationship.EventType;
 import com.heartbound.relationship.Home;
@@ -53,9 +52,6 @@ public final class StageBehaviors {
 
     /** Player to partner mob, for players who are asleep with their partner nearby. */
     private static final Map<UUID, UUID> SLEPT_NEAR_PARTNER = new HashMap<>();
-
-    /** Player to the night (see RestRules.nightIndex) for which the morning bonus was last given. */
-    private static final Map<UUID, Long> LAST_MORNING = new HashMap<>();
 
     /** Mobs currently holding hands with a player (transient, not saved). */
     private static final Map<UUID, HandHold> HAND_HOLDS = new HashMap<>();
@@ -226,17 +222,8 @@ public final class StageBehaviors {
         }
     }
 
-    /**
-     * Hearts, regeneration and experience for a morning together. Given at most once per night, whether the
-     * player slept next to the partner or the partner lay down at night.
-     */
-    public static void morningBonus(ServerPlayer player, UUID mobId) {
+    private static void morningBonus(ServerPlayer player, UUID mobId) {
         ServerLevel level = player.serverLevel();
-        long night = RestRules.nightIndex(level.getDayTime());
-        Long last = LAST_MORNING.put(player.getUUID(), night);
-        if (last != null && last == night) {
-            return;
-        }
         player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, HeartboundConfig.get().morningBonusSeconds * 20, 1));
         player.giveExperiencePoints(HeartboundConfig.get().morningBonusXp);
         MemoryRecorder.record(player, mobId, player.blockPosition().asLong(), EventType.FIRST_MORNING, 0);

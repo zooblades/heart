@@ -52,11 +52,11 @@
   "gesture.heartbound.success.hug": "%1$s тепло обнимает вас",
   "gesture.heartbound.success.cheek_kiss": "%1$s краснеет и улыбается",
   "gesture.heartbound.success.kiss": "%1$s улыбается и целует вас",
-  "gesture.heartbound.success.lie_down": "%1$s ложится рядом с вами",
+  "gesture.heartbound.success.lie_down": "%1$s ложится на соседнюю кровать",
   "gesture.heartbound.got_up": "%1$s поднимается",
   "gesture.heartbound.lie_down.busy": "%1$s сейчас не может прилечь",
-  "gesture.heartbound.lie_down.no_bed": "%1$s не находит, где прилечь: рядом нужна свободная кровать",
-  "gesture.heartbound.lie_down.too_early": "%1$s хочет прилечь только вечером, когда стемнеет",
+  "gesture.heartbound.lie_down.no_bed": "Нужны две свободные кровати рядом",
+  "gesture.heartbound.lie_down.too_early": "Прилечь можно только ночью",
   "gesture.heartbound.refused.shy": "%1$s смущается и отступает",
   "gesture.heartbound.refused.neutral": "%1$s сейчас не в настроении",
   "gesture.heartbound.refused.bold": "%1$s качает головой",
@@ -267,5 +267,5 @@
   "event.heartbound.proposal": "Стали парой",
   "event.heartbound.first_morning": "Первое совместное утро",
   "event.heartbound.breakup": "Расстались",
-  "event.heartbound.first_lie_down": "Первый раз прилегли рядом"
+  "event.heartbound.first_lie_down": "Первая ночь на соседних кроватях"
 }

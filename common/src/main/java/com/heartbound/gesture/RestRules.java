@@ -15,12 +15,4 @@ public final class RestRules {
         long t = Math.floorMod(dayTime, DAY_LENGTH);
         return t >= NIGHT_START && t < NIGHT_END;
     }
-
-    /**
-     * Index of the "night" a moment belongs to: constant from noon to the next noon, so the evening, the
-     * night and the following morning share one value. Used to give the morning bonus once per night.
-     */
-    public static long nightIndex(long dayTime) {
-        return Math.floorDiv(dayTime + 12000L, DAY_LENGTH);
-    }
 }
