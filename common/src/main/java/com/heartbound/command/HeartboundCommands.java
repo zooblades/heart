@@ -1,5 +1,7 @@
 package com.heartbound.command;
 
+import com.heartbound.date.DateManager;
+import com.heartbound.date.DateRules.DateType;
 import com.heartbound.interaction.InteractionHandler;
 import com.heartbound.relationship.RelationshipData;
 import com.heartbound.relationship.RelationshipStage;
@@ -16,10 +18,12 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
 
 /**
  * Debug commands (operators only):
  * <pre>{@code
+ * /heartbound date <mob> walk|place|home   (starts a date with your partner now, for testing)
  * /heartbound affinity get <mob>
  * /heartbound affinity set <mob> <value>
  * /heartbound affinity add <mob> <amount>
@@ -40,6 +44,14 @@ public final class HeartboundCommands {
                         .then(Commands.argument("token", IntegerArgumentType.integer())
                                 .then(Commands.argument("option", IntegerArgumentType.integer(0, 2))
                                         .executes(HeartboundCommands::reply))))
+                .then(Commands.literal("date").requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("mob", EntityArgument.entity())
+                                .then(Commands.literal("walk")
+                                        .executes(ctx -> startDate(ctx, DateType.WALK)))
+                                .then(Commands.literal("place")
+                                        .executes(ctx -> startDate(ctx, DateType.PLACE)))
+                                .then(Commands.literal("home")
+                                        .executes(ctx -> startDate(ctx, DateType.HOME)))))
                 .then(Commands.literal("affinity").requires(source -> source.hasPermission(2))
                         .then(Commands.literal("get")
                                 .then(Commands.argument("mob", EntityArgument.entity())
@@ -52,6 +64,20 @@ public final class HeartboundCommands {
                                 .then(Commands.argument("mob", EntityArgument.entity())
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(-max, max))
                                                 .executes(HeartboundCommands::add))))));
+    }
+
+    /** For testing: starts a date with your partner right now, without waiting for an invitation. */
+    private static int startDate(CommandContext<CommandSourceStack> ctx, DateType type) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        Entity mob = resolveMob(ctx);
+        RelationshipData data = RelationshipData.get(ctx.getSource().getServer());
+        if (!(mob instanceof Mob partner) || !data.isPartner(mob.getUUID(), player.getUUID())) {
+            throw error("Only your partner can go on a date with you.");
+        }
+        if (!DateManager.start(player.serverLevel(), player, partner, type, data)) {
+            throw error("This date cannot start: no home point is set, no place was found, or a date is already going.");
+        }
+        return 1;
     }
 
     private static int breakUp(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
