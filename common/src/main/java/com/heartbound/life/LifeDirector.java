@@ -180,7 +180,7 @@ public final class LifeDirector {
     }
 
     /** True when the mob is not busy walking somewhere. */
-    private static boolean idle(Mob mob) {
+    static boolean idle(Mob mob) {
         return usesBrain(mob)
                 ? !mob.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)
                 : mob.getNavigation().isDone();
@@ -192,7 +192,7 @@ public final class LifeDirector {
         moveTo(mob, player.getX() + Math.cos(angle) * radius, mob.getY(), player.getZ() + Math.sin(angle) * radius);
     }
 
-    private static void moveTo(Mob mob, double x, double y, double z) {
+    static void moveTo(Mob mob, double x, double y, double z) {
         if (usesBrain(mob)) {
             mob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new Vec3(x, y, z), 0.6F, 1));
         } else {

@@ -15,7 +15,8 @@ public enum EventType {
     FIRST_MORNING,
     BREAKUP,
     FIRST_LIE_DOWN,
-    FIRST_DATE;
+    FIRST_DATE,
+    FIRST_PARTNER_GIFT;
 
     public String key() {
         return name().toLowerCase(Locale.ROOT);

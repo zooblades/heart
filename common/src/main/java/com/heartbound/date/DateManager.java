@@ -3,6 +3,8 @@ package com.heartbound.date;
 import com.heartbound.behavior.FreezeManager;
 import com.heartbound.date.DateRules.DateType;
 import com.heartbound.date.DateRules.FailReason;
+import com.heartbound.partnergift.PartnerGiftRules;
+import com.heartbound.partnergift.PartnerGifts;
 import com.heartbound.relationship.EventType;
 import com.heartbound.relationship.Home;
 import com.heartbound.relationship.MemoryRecorder;
@@ -191,6 +193,7 @@ public final class DateManager {
             level.sendParticles(ParticleTypes.HEART, mob.getX(), mob.getY() + mob.getBbHeight() + 0.2D, mob.getZ(),
                     8, 0.4D, 0.3D, 0.4D, 0.02D);
             talk(player, mob, DateRules.successKey(date.type));
+            PartnerGifts.give(level, player, mob, PartnerGiftRules.Occasion.DATE, data);
         } else {
             player.sendSystemMessage(Component.translatable(DateRules.failKey(reason), mob.getName())
                     .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));

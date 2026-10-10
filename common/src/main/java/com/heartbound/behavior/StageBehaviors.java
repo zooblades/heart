@@ -2,7 +2,9 @@ package com.heartbound.behavior;
 
 import com.heartbound.config.HeartboundConfig;
 import com.heartbound.date.DateManager;
+import com.heartbound.life.HomeRoutine;
 import com.heartbound.life.LifeDirector;
+import com.heartbound.partnergift.PartnerGifts;
 import com.heartbound.relationship.EventType;
 import com.heartbound.relationship.Home;
 import com.heartbound.relationship.MemoryRecorder;
@@ -92,6 +94,8 @@ public final class StageBehaviors {
             LifeDirector.tick(server, data);
             PartnerTalk.tick(server, data);
             DateManager.tick(server, data);
+            HomeRoutine.tick(server, data);
+            PartnerGifts.tick(server, data);
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             nearbyTick(player, data);

@@ -43,7 +43,7 @@ public class RelationshipMenu extends AbstractContainerMenu {
     private static final int DATA_FAVORITE = 7;
     private static final int DATA_COUNTERS = 8;
     private static final int DATA_EVENTS = 12;
-    public static final int EVENT_SLOTS = 12;
+    public static final int EVENT_SLOTS = 14;
     private static final int DATA_COUNT = DATA_EVENTS + EVENT_SLOTS * 3;
 
     private final ContainerData data;

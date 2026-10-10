@@ -1,6 +1,7 @@
 package com.heartbound.behavior;
 
 import com.heartbound.gesture.RestRules;
+import com.heartbound.life.HomeRoutine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -61,13 +62,14 @@ public final class RestManager {
         if (!(entity instanceof Mob mob) || !(mob.level() instanceof ServerLevel level)) {
             return Check.BUSY;
         }
-        if (mob.isPassenger() || mob.isSleeping() || player.isSleeping() || RESTS.containsKey(mob.getUUID())) {
+        if (mob.isPassenger() || (mob.isSleeping() && !HomeRoutine.isAsleep(mob.getUUID())) || player.isSleeping()
+                || RESTS.containsKey(mob.getUUID())) {
             return Check.BUSY;
         }
         if (!isNight(level)) {
             return Check.TOO_EARLY;
         }
-        return findBeds(level, player) == null ? Check.NO_BED : Check.OK;
+        return findBeds(level, player, HomeRoutine.bedOf(mob.getUUID())) == null ? Check.NO_BED : Check.OK;
     }
 
     /**
@@ -75,10 +77,11 @@ public final class RestManager {
      * message to show to the player if it did not work (the player was refused by the game, no beds).
      */
     public static Component start(ServerLevel level, ServerPlayer player, Mob mob) {
-        BlockPos[] beds = findBeds(level, player);
+        BlockPos[] beds = findBeds(level, player, HomeRoutine.bedOf(mob.getUUID()));
         if (beds == null) {
             return Component.translatable("gesture.heartbound.lie_down.no_bed", mob.getName());
         }
+        HomeRoutine.wake(mob); // the partner was asleep in its own bed: that bed is free again
         var result = player.startSleepInBed(beds[0]);
         if (result.left().isPresent()) {
             Component message = result.left().get().getMessage();
@@ -132,7 +135,7 @@ public final class RestManager {
      * Two different free beds (head parts) near the player: the nearest one to the player, and the nearest
      * other one to it that is within PAIR_DISTANCE_SQR. Null if there is no such pair.
      */
-    private static BlockPos[] findBeds(ServerLevel level, ServerPlayer player) {
+    private static BlockPos[] findBeds(ServerLevel level, ServerPlayer player, BlockPos freeAnyway) {
         BlockPos origin = player.blockPosition();
         List<BlockPos> beds = new ArrayList<>();
         for (BlockPos pos : BlockPos.betweenClosed(
@@ -140,7 +143,7 @@ public final class RestManager {
             BlockState state = level.getBlockState(pos);
             if (state.getBlock() instanceof BedBlock
                     && state.getValue(BedBlock.PART) == BedPart.HEAD
-                    && !state.getValue(BedBlock.OCCUPIED)) {
+                    && (!state.getValue(BedBlock.OCCUPIED) || pos.equals(freeAnyway))) {
                 beds.add(pos.immutable());
             }
         }
