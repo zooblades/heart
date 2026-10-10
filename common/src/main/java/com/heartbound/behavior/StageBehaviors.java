@@ -1,6 +1,7 @@
 package com.heartbound.behavior;
 
 import com.heartbound.config.HeartboundConfig;
+import com.heartbound.date.DateManager;
 import com.heartbound.life.LifeDirector;
 import com.heartbound.relationship.EventType;
 import com.heartbound.relationship.Home;
@@ -90,6 +91,7 @@ public final class StageBehaviors {
         if (server.getTickCount() % 20 == 0) {
             LifeDirector.tick(server, data);
             PartnerTalk.tick(server, data);
+            DateManager.tick(server, data);
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             nearbyTick(player, data);
@@ -118,7 +120,7 @@ public final class StageBehaviors {
                 continue;
             }
             if (mob.level() != player.level() || mob.isPassenger() || isSitting(mob)
-                    || FreezeManager.isFrozen(mobId)) {
+                    || FreezeManager.isFrozen(mobId) || DateManager.isOnDate(mobId)) {
                 continue;
             }
 
@@ -149,7 +151,7 @@ public final class StageBehaviors {
                 HAND_HOLDS.remove(entry.getKey());
                 continue;
             }
-            if (FreezeManager.isFrozen(entry.getKey())) {
+            if (FreezeManager.isFrozen(entry.getKey()) || DateManager.isOnDate(entry.getKey())) {
                 continue;
             }
             double distanceSqr = mob.distanceToSqr(player);
@@ -168,7 +170,7 @@ public final class StageBehaviors {
         for (Map.Entry<UUID, Home> entry : data.homesSnapshot().entrySet()) {
             Entity found = findEntity(server, entry.getKey());
             if (!(found instanceof Mob mob) || !mob.isAlive() || mob.isPassenger() || isSitting(mob)
-                    || FreezeManager.isFrozen(entry.getKey())) {
+                    || FreezeManager.isFrozen(entry.getKey()) || DateManager.isOnDate(entry.getKey())) {
                 continue;
             }
             Home home = entry.getValue();

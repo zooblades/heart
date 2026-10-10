@@ -3,6 +3,9 @@ package com.heartbound.talk;
 import com.heartbound.behavior.FreezeManager;
 import com.heartbound.behavior.RestManager;
 import com.heartbound.config.HeartboundConfig;
+import com.heartbound.date.DateManager;
+import com.heartbound.date.DateRules;
+import com.heartbound.date.DateRules.DateType;
 import com.heartbound.gesture.MobMood;
 import com.heartbound.gesture.Personality;
 import com.heartbound.relationship.Home;
@@ -46,7 +49,7 @@ public final class PartnerTalk {
     private static final double TALK_DISTANCE_SQR = 10.0D * 10.0D;
     private static final double REPLY_DISTANCE_SQR = 16.0D * 16.0D;
 
-    private record Pending(int token, UUID mob, long expires, int depth) {
+    private record Pending(int token, UUID mob, long expires, int depth, Prompt prompt) {
     }
 
     /** A recent event the partner may bring up (a gift, a hug, a quarrel). */
@@ -60,6 +63,8 @@ public final class PartnerTalk {
     private static final Map<UUID, Pending> PENDING = new HashMap<>();
     /** Game tick before which a mob does not start a conversation. */
     private static final Map<UUID, Long> NEXT = new HashMap<>();
+    /** Game tick before which a mob does not invite the player on a date. */
+    private static final Map<UUID, Long> NEXT_DATE = new HashMap<>();
     private static final Map<UUID, Prompt> LAST_PROMPT = new HashMap<>();
     private static final Map<UUID, Integer> LAST_VARIANT = new HashMap<>();
     private static int nextToken = 1;
@@ -128,14 +133,41 @@ public final class PartnerTalk {
             }
         }
         Prompt last = LAST_PROMPT.get(mobId);
+        Prompt invite = dateInvite(level, mob, now);
         PartnerTalkRules.Context context = new PartnerTalkRules.Context(Period.of(level.getDayTime()),
-                MobMood.isUpset(mob), player.getHealth() <= 8.0F, event, situation(level, mob));
+                MobMood.isUpset(mob), player.getHealth() <= 8.0F, event, situation(level, mob), invite);
         Prompt prompt = PartnerTalkRules.choose(context, last, level.random.nextInt(100));
         if (prompt == event) {
             RECENT.remove(mobId);
         }
+        if (prompt == invite && invite != null) {
+            int cooldown = HeartboundConfig.get().dateCooldownSeconds;
+            NEXT_DATE.put(mobId, now + cooldown * 20L + level.random.nextInt(Math.max(1, cooldown * 10)));
+        }
         NEXT.put(mobId, now + seconds * 20L + level.random.nextInt(Math.max(1, seconds * 10)));
         ask(level, player, mob, prompt, 0, now);
+    }
+
+    /** A date the partner may suggest now, or null (not yet time, no date fits, or invitations are off). */
+    private static Prompt dateInvite(ServerLevel level, Mob mob, long now) {
+        int cooldown = HeartboundConfig.get().dateCooldownSeconds;
+        UUID mobId = mob.getUUID();
+        if (cooldown <= 0 || DateManager.isOnDate(mobId) || level.getServer() == null) {
+            return null;
+        }
+        Long next = NEXT_DATE.get(mobId);
+        if (next == null) {
+            NEXT_DATE.put(mobId, now + 3600L + level.random.nextInt(2400));
+            return null;
+        }
+        if (now < next || level.random.nextInt(100) >= 40) {
+            return null;
+        }
+        Home home = RelationshipData.get(level.getServer()).getHome(mobId);
+        boolean hasHome = home != null && home.dimension().equals(level.dimension().location().toString());
+        DateType type = DateRules.chooseType(Period.of(level.getDayTime()), level.isRaining(), hasHome,
+                level.dimension() == Level.OVERWORLD, level.random.nextInt(100));
+        return type == null ? null : Prompt.forDate(type);
     }
 
     /** What the surroundings suggest talking about, or null. */
@@ -166,7 +198,7 @@ public final class PartnerTalk {
         LAST_VARIANT.put(mobId, variant);
 
         int token = nextToken++;
-        PENDING.put(player.getUUID(), new Pending(token, mobId, now + ANSWER_TIME_TICKS, depth));
+        PENDING.put(player.getUUID(), new Pending(token, mobId, now + ANSWER_TIME_TICKS, depth, prompt));
         FreezeManager.freezeUntil(mobId, now + 200L);
 
         TalkHandler.say(player, mob, PartnerTalkRules.openKey(prompt, variant));
@@ -224,6 +256,14 @@ public final class PartnerTalk {
                 level.random.nextInt(PartnerTalkRules.REACT_VARIANTS)));
         if (outcome == Outcome.BAD) {
             note(mobId, Prompt.QUARREL, now);
+        }
+        DateType dateType = pending.prompt().dateType();
+        if (dateType != null) {
+            if (tone != Tone.COLD && !DateManager.start(level, player, mob, dateType, data)) {
+                player.sendSystemMessage(Component.translatable(DateRules.failKey(DateRules.FailReason.LOST), mob.getName())
+                        .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            }
+            return;
         }
         if (pending.depth() == 0) {
             Prompt follow = PartnerTalkRules.followUp(outcome, level.random.nextInt(100));

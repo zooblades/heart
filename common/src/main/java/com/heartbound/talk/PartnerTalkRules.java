@@ -1,5 +1,6 @@
 package com.heartbound.talk;
 
+import com.heartbound.date.DateRules.DateType;
 import com.heartbound.gesture.Personality;
 
 import java.util.ArrayList;
@@ -64,7 +65,31 @@ public final class PartnerTalkRules {
         HOME,
         NETHER,
         CAVE,
-        RAIN;
+        RAIN,
+        /** The partner suggests a date: a walk, a special place, an evening at home. */
+        DATE_WALK,
+        DATE_PLACE,
+        DATE_HOME,
+        /** After a successful date. */
+        DATE_DONE;
+
+        /** The kind of date this invitation is about, or null if it is not an invitation. */
+        public DateType dateType() {
+            return switch (this) {
+                case DATE_WALK -> DateType.WALK;
+                case DATE_PLACE -> DateType.PLACE;
+                case DATE_HOME -> DateType.HOME;
+                default -> null;
+            };
+        }
+
+        public static Prompt forDate(DateType type) {
+            return switch (type) {
+                case WALK -> DATE_WALK;
+                case PLACE -> DATE_PLACE;
+                case HOME -> DATE_HOME;
+            };
+        }
 
         public String key() {
             return name().toLowerCase(Locale.ROOT);
@@ -107,7 +132,12 @@ public final class PartnerTalkRules {
     }
 
     /** What is going on around the partner when it decides to talk. Event and situation may be null. */
-    public record Context(Period period, boolean partnerUpset, boolean playerHurt, Prompt event, Prompt situation) {
+    public record Context(Period period, boolean partnerUpset, boolean playerHurt, Prompt event, Prompt situation,
+                          Prompt dateInvite) {
+
+        public Context(Period period, boolean partnerUpset, boolean playerHurt, Prompt event, Prompt situation) {
+            this(period, partnerUpset, playerHurt, event, situation, null);
+        }
     }
 
     /**
@@ -126,6 +156,9 @@ public final class PartnerTalkRules {
         }
         if (context.event() != null && context.event() != last) {
             return context.event();
+        }
+        if (context.dateInvite() != null && context.dateInvite() != last) {
+            return context.dateInvite();
         }
         if (context.situation() != null && context.situation() != last && roll % 100 < 50) {
             return context.situation();

@@ -115,6 +115,26 @@ class PartnerTalkRulesTest {
     }
 
     @Test
+    void dateInvitationComesAfterEventsAndBeforeSituations() {
+        PartnerTalkRules.Context invite = new PartnerTalkRules.Context(Period.DAY, false, false, null, Prompt.RAIN, Prompt.DATE_WALK);
+        assertEquals(Prompt.DATE_WALK, PartnerTalkRules.choose(invite, null, 10));
+        assertNotEquals(Prompt.DATE_WALK, PartnerTalkRules.choose(invite, Prompt.DATE_WALK, 90));
+        PartnerTalkRules.Context withEvent = new PartnerTalkRules.Context(Period.DAY, false, false, Prompt.GIFT, null, Prompt.DATE_WALK);
+        assertEquals(Prompt.GIFT, PartnerTalkRules.choose(withEvent, null, 10));
+        PartnerTalkRules.Context hurt = new PartnerTalkRules.Context(Period.DAY, false, true, null, null, Prompt.DATE_WALK);
+        assertEquals(Prompt.WORRY, PartnerTalkRules.choose(hurt, null, 10));
+    }
+
+    @Test
+    void invitationsMapToDateTypes() {
+        for (com.heartbound.date.DateRules.DateType type : com.heartbound.date.DateRules.DateType.values()) {
+            assertEquals(type, Prompt.forDate(type).dateType());
+        }
+        assertNull(Prompt.GLAD.dateType());
+        assertNull(Prompt.DATE_DONE.dateType());
+    }
+
+    @Test
     void toneLookup() {
         assertEquals(Tone.COLD, Tone.byId(2));
         assertNull(Tone.byId(3));
