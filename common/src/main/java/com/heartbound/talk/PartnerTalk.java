@@ -2,7 +2,7 @@ package com.heartbound.talk;
 
 import com.heartbound.behavior.FreezeManager;
 import com.heartbound.behavior.RestManager;
-import com.heartbound.config.HeartboundConfig;
+import com.heartbound.config.ModGameRules;
 import com.heartbound.date.DateManager;
 import com.heartbound.date.DateRules;
 import com.heartbound.date.DateRules.DateType;
@@ -79,7 +79,7 @@ public final class PartnerTalk {
 
     /** Called about once a second. */
     public static void tick(MinecraftServer server, RelationshipData data) {
-        int seconds = HeartboundConfig.get().partnerTalkSeconds;
+        int seconds = ModGameRules.partnerTalkSeconds(server);
         if (seconds <= 0) {
             PENDING.clear();
             return;
@@ -141,7 +141,7 @@ public final class PartnerTalk {
             RECENT.remove(mobId);
         }
         if (prompt == invite && invite != null) {
-            int cooldown = HeartboundConfig.get().dateCooldownSeconds;
+            int cooldown = ModGameRules.dateCooldownSeconds(level.getServer());
             NEXT_DATE.put(mobId, now + cooldown * 20L + level.random.nextInt(Math.max(1, cooldown * 10)));
         }
         NEXT.put(mobId, now + seconds * 20L + level.random.nextInt(Math.max(1, seconds * 10)));
@@ -150,7 +150,7 @@ public final class PartnerTalk {
 
     /** A date the partner may suggest now, or null (not yet time, no date fits, or invitations are off). */
     private static Prompt dateInvite(ServerLevel level, Mob mob, long now) {
-        int cooldown = HeartboundConfig.get().dateCooldownSeconds;
+        int cooldown = level.getServer() == null ? 0 : ModGameRules.dateCooldownSeconds(level.getServer());
         UUID mobId = mob.getUUID();
         if (cooldown <= 0 || DateManager.isOnDate(mobId) || level.getServer() == null) {
             return null;

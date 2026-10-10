@@ -413,5 +413,9 @@
   "date.heartbound.fail.abandoned": "Свидание не удалось: вы ушли слишком далеко друг от друга",
   "date.heartbound.fail.lost": "Свидание не получилось",
   "date.heartbound.fail.hurt": "Свидание прервалось: что-то случилось с %1$s",
-  "event.heartbound.first_date": "Первое свидание"
+  "event.heartbound.first_date": "Первое свидание",
+  "gamerule.heartboundPartnerTalkSeconds": "Heartbound: пауза между разговорами партнёра (сек)",
+  "gamerule.heartboundPartnerTalkSeconds.description": "Средняя пауза в секундах между разговорами, которые партнёр начинает сам. 0 выключает",
+  "gamerule.heartboundDateCooldownSeconds": "Heartbound: пауза между приглашениями на свидание (сек)",
+  "gamerule.heartboundDateCooldownSeconds.description": "Средняя пауза в секундах между приглашениями партнёра на свидание. 0 выключает"
 }

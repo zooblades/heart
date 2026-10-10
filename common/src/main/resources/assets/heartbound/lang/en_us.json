@@ -413,5 +413,9 @@
   "date.heartbound.fail.abandoned": "The date did not work out: you went too far from each other",
   "date.heartbound.fail.lost": "The date did not work out",
   "date.heartbound.fail.hurt": "The date was interrupted: something happened to %1$s",
-  "event.heartbound.first_date": "First date"
+  "event.heartbound.first_date": "First date",
+  "gamerule.heartboundPartnerTalkSeconds": "Heartbound: pause between partner conversations (s)",
+  "gamerule.heartboundPartnerTalkSeconds.description": "Average pause in seconds between conversations the partner starts by itself. 0 turns them off",
+  "gamerule.heartboundDateCooldownSeconds": "Heartbound: pause between date invitations (s)",
+  "gamerule.heartboundDateCooldownSeconds.description": "Average pause in seconds between date invitations from the partner. 0 turns them off"
 }
