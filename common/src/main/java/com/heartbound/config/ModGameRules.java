@@ -1,5 +1,6 @@
 package com.heartbound.config;
 
+import com.heartbound.platform.Services;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameRules;
 
@@ -20,10 +21,10 @@ public final class ModGameRules {
 
     /** Registers the rules; called once when the mod starts, before any world is loaded. */
     public static void register() {
-        partnerTalkSeconds = GameRules.register("heartboundPartnerTalkSeconds", GameRules.Category.MOBS,
-                GameRules.IntegerValue.create(DEFAULT_PARTNER_TALK_SECONDS, (server, value) -> { }));
-        dateCooldownSeconds = GameRules.register("heartboundDateCooldownSeconds", GameRules.Category.MOBS,
-                GameRules.IntegerValue.create(DEFAULT_DATE_COOLDOWN_SECONDS, (server, value) -> { }));
+        partnerTalkSeconds = Services.PLATFORM.registerIntGameRule("heartboundPartnerTalkSeconds",
+                DEFAULT_PARTNER_TALK_SECONDS);
+        dateCooldownSeconds = Services.PLATFORM.registerIntGameRule("heartboundDateCooldownSeconds",
+                DEFAULT_DATE_COOLDOWN_SECONDS);
     }
 
     /** Average pause between conversations the partner starts, in seconds; 0 turns them off. */

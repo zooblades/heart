@@ -23,6 +23,13 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
+    public net.minecraft.world.level.GameRules.Key<net.minecraft.world.level.GameRules.IntegerValue> registerIntGameRule(
+            String name, int defaultValue) {
+        return net.minecraft.world.level.GameRules.register(name, net.minecraft.world.level.GameRules.Category.MOBS,
+                net.minecraft.world.level.GameRules.IntegerValue.create(defaultValue));
+    }
+
+    @Override
     public boolean isDevelopmentEnvironment() {
         return !FMLLoader.isProduction();
     }
